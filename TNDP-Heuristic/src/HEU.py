@@ -1,13 +1,26 @@
 import networkx as nx
 import numpy as np
+import pandas as pd
+from geographiclib.geodesic import Geodesic
 # import matplotlib.pyplot as plt
-import genInput
+# import genInput
 
+stop_df = pd.read_csv('D:\\learning\\workspace\\python\\TNDP\\preProcessing\\data\\unique_stop_downtown.csv')
 def get_highest_demand_pair(demand_matrix):
     return np.unravel_index(np.argmax(demand_matrix), demand_matrix.shape)
 
-def get_highest_demand_destination_from(source, demand_matrix):
-    return np.argmax(demand_matrix[source])
+def get_highest_demand_destination_from(source, demand_matrix, route):
+    ind = np.argsort(demand_matrix[source])[::-1]
+    for dest in ind:
+        if not_detour(source, dest, route):
+           return dest
+    return -1
+
+def not_detour(source, dest, route):
+    old_route_direction = Geodesic.WGS84.Inverse(stop_df.loc[route[-2], '纬度'], stop_df.loc[route[-2], '经度'], stop_df.loc[route[-1], '纬度'], stop_df.loc[route[-1], '经度'])['azi1']
+    new_route_direction = Geodesic.WGS84.Inverse(stop_df.loc[source, '纬度'], stop_df.loc[source, '经度'], stop_df.loc[dest, '纬度'], stop_df.loc[dest, '经度'])['azi1']
+    angle = abs(old_route_direction - new_route_direction)
+    return (angle > 0 and angle < 90) or (angle > 270 and angle < 360)
 
 def get_highest_demand_destination_from_depot(demand_matrix, depot_list):
     demand_matrix_from_depot = demand_matrix[depot_list]
@@ -64,8 +77,8 @@ def get_route_satisfying_constraint(graph, demand_matrix, weight, min_hop_count,
             break
         disconnect_nodes_in_route_from_graph(graph, route[:-1])
         demand_matrix, _ = set_demand_satisfied_in_route(demand_matrix, route)
-        source, dest = dest, get_highest_demand_destination_from(dest, demand_matrix)
-        if demand_matrix[source][dest] == 0.:
+        source, dest = dest, get_highest_demand_destination_from(dest, demand_matrix, route)
+        if demand_matrix[source][dest] == 0 or dest == -1:
             break
     # print(route)
     return route

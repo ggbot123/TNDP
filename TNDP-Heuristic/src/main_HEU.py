@@ -54,46 +54,49 @@ def set_demand_satisfied_in_route(route, demand_matrix, transfer_matrix, max_tra
                 demand_matrix[i][j] = 0.
     return demand_matrix, satisfied_demand
 
-graph, demand_matrix = genInput.graph.copy(), genInput.demand_matrix.copy()
-
-max_hop_count = int(sys.argv[2])
 min_hop_count = int(sys.argv[1])
+max_hop_count = int(sys.argv[2])
 num_of_routes = int(sys.argv[3])
-best_weight = float(sys.argv[4])
-depot_list = np.arange(graph.number_of_nodes())
+# best_weight = [float(sys.argv[4])]
 
-routes, _ = HEU(graph, demand_matrix, best_weight, min_hop_count, max_hop_count, num_of_routes, depot_list)
+best_weight = [0.5, 1, 2, 4, 6, 20]
 
-print(len(routes))
-travel_time_matrix, transfer_matrix = evaluate(routes, graph, demand_matrix)
-np.savetxt('D:\\learning\\workspace\\python\\TNDP\\TNDP-Heuristic\\result\\travel_time.csv', travel_time_matrix, delimiter=',', fmt="%.2f")
-np.savetxt('D:\\learning\\workspace\\python\\TNDP\\TNDP-Heuristic\\result\\transfer.csv', transfer_matrix, delimiter=',', fmt="%d")
-ATT = travel_time_matrix[np.where(travel_time_matrix != -1)].mean()
-ATrans = transfer_matrix[np.where(transfer_matrix != -1)].mean()
-print('Average Travel Time: %f min\n' % ATT)
-print('Average Transfer: %f\n' % ATrans)
+for weight in best_weight:
+    graph, demand_matrix = genInput.graph.copy(), genInput.demand_matrix.copy()
+    depot_list = np.arange(graph.number_of_nodes())
+    routes, _ = HEU(graph, demand_matrix, weight, min_hop_count, max_hop_count, num_of_routes, depot_list)
 
-demand_matrix = genInput.demand_matrix
-total_demand = demand_matrix.sum()
-for route in routes:
-    assert(len(route) == len(set(route)))
-    demand_matrix, satisfied_demand = set_demand_satisfied_in_route(route, demand_matrix, transfer_matrix, 1000)
-    print(route, satisfied_demand)
-print('Unfulfilled demand: {}%'.format(demand_matrix.sum()/total_demand))
+    print(len(routes))
+    travel_time_matrix, transfer_matrix = evaluate(routes, graph, demand_matrix)
+    np.savetxt('D:\\learning\\workspace\\python\\TNDP\\TNDP-Heuristic\\result\\travel_time.csv', travel_time_matrix, delimiter=',', fmt="%.2f")
+    np.savetxt('D:\\learning\\workspace\\python\\TNDP\\TNDP-Heuristic\\result\\transfer.csv', transfer_matrix, delimiter=',', fmt="%d")
+    ATT = travel_time_matrix[np.where(travel_time_matrix != -1)].mean()
+    ATrans = transfer_matrix[np.where(transfer_matrix != -1)].mean()
+    print('Average Travel Time: %f min\n' % ATT)
+    print('Average Transfer: %f\n' % ATrans)
 
-demand_matrix = genInput.demand_matrix
-for route in routes:
-    demand_matrix, _ = set_demand_satisfied_in_route(route, demand_matrix, transfer_matrix, 0)
-print('Directly unfulfilled demand: {}%'.format(demand_matrix.sum()/total_demand))
+    demand_matrix = genInput.demand_matrix
+    total_demand = demand_matrix.sum()
+    for route in routes:
+        assert(len(route) == len(set(route)))
+        demand_matrix, satisfied_demand = set_demand_satisfied_in_route(route, demand_matrix, transfer_matrix, 1000)
+        print(route, satisfied_demand)
+    print('Unfulfilled demand: {}%'.format(demand_matrix.sum()/total_demand))
 
-demand_matrix = genInput.demand_matrix
-for route in routes:
-    demand_matrix, _ = set_demand_satisfied_in_route(route, demand_matrix, transfer_matrix, 1)
-print('One-transfer unfulfilled demand: {}%'.format(demand_matrix.sum()/total_demand))
+    demand_matrix = genInput.demand_matrix
+    for route in routes:
+        demand_matrix, _ = set_demand_satisfied_in_route(route, demand_matrix, transfer_matrix, 0)
+    print('Directly unfulfilled demand: {}%'.format(demand_matrix.sum()/total_demand))
 
-demand_matrix = genInput.demand_matrix
-for route in routes:
-    demand_matrix, _ = set_demand_satisfied_in_route(route, demand_matrix, transfer_matrix, 2)
-print('Two-transfer unfulfilled demand: {}%'.format(demand_matrix.sum()/total_demand))
+    demand_matrix = genInput.demand_matrix
+    for route in routes:
+        demand_matrix, _ = set_demand_satisfied_in_route(route, demand_matrix, transfer_matrix, 1)
+    print('One-transfer unfulfilled demand: {}%'.format(demand_matrix.sum()/total_demand))
 
-create_geojson(routes)
+    demand_matrix = genInput.demand_matrix
+    for route in routes:
+        demand_matrix, _ = set_demand_satisfied_in_route(route, demand_matrix, transfer_matrix, 2)
+    print('Two-transfer unfulfilled demand: {}%'.format(demand_matrix.sum()/total_demand))
+
+    filename = 'D:\\learning\\workspace\\python\\TNDP\\TNDP-Heuristic\\result\\lines.geojson_%s.json' % str(weight)
+    create_geojson(routes, filename)
