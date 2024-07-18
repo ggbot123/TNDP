@@ -9,23 +9,16 @@ stop_df = pd.read_csv('D:\\learning\\workspace\\python\\TNDP\\preProcessing\\dat
 def get_highest_demand_pair(demand_matrix):
     return np.unravel_index(np.argmax(demand_matrix), demand_matrix.shape)
 
-def get_highest_demand_destination_from(source, demand_matrix, route, taboo_list, graph, weight):
+def get_highest_demand_destination_from(source, demand_matrix, route):
     O_list, D_list = np.unravel_index(np.argsort(demand_matrix[route], axis=None)[::-1], demand_matrix[route].shape)
     # ind = np.argsort(demand_matrix[source])[::-1]
     for i in range(len(O_list)):
         O, dest = route[O_list[i]], D_list[i]
         if demand_matrix[O][dest] == 0:
-            return -1, []
-        elif (source, dest) not in taboo_list and not_detour(source, dest, route):
-            try:
-                route_chunk = get_best_route_between(source, dest, graph, demand_matrix, weight)
-            except nx.NetworkXNoPath as e:
-                return -1, []
-            if not_detour(route[-1], route_chunk[1], route):
-                return dest, route_chunk
-            else:
-                taboo_list.append((source, dest))
-    return -1, []
+            return -1
+        elif not_detour(source, dest, route):
+            return dest
+    return -1
 
 def not_detour(source, dest, route):
     old_route_direction = [Geodesic.WGS84.Inverse(stop_df.loc[route[-(i+1)], '纬度'], stop_df.loc[route[-(i+1)], '经度'],
@@ -74,12 +67,14 @@ def get_best_route_between(source, dest, graph, demand_matrix, weight):
 def get_route_satisfying_constraint(graph, demand_matrix, weight, min_hop_count, max_hop_count, depot_list):
     graph = graph.copy()
     demand_matrix = demand_matrix.copy()
-    taboo_list = []
     # source, dest = get_highest_demand_pair(demand_matrix)
     source, dest = get_highest_demand_destination_from_depot(demand_matrix, depot_list)
     route = [source]
-    route_chunk = get_best_route_between(source, dest, graph, demand_matrix, weight)
     while True:
+        try:
+            route_chunk = get_best_route_between(source, dest, graph, demand_matrix, weight)
+        except nx.NetworkXNoPath as e:
+            break
         route_chunk = route_chunk[1:]
         if len(route) + len(route_chunk) <= max_hop_count:
             route.extend(route_chunk)
@@ -87,8 +82,7 @@ def get_route_satisfying_constraint(graph, demand_matrix, weight, min_hop_count,
             break
         disconnect_nodes_in_route_from_graph(graph, route[:-1])
         demand_matrix, _ = set_demand_satisfied_in_route(demand_matrix, route)
-        source = dest
-        dest, route_chunk = get_highest_demand_destination_from(dest, demand_matrix, route, taboo_list, graph, weight)
+        source, dest = dest, get_highest_demand_destination_from(dest, demand_matrix, route)
         # if demand_matrix[source][dest] == 0 or dest == -1:
         if dest == -1:
             break

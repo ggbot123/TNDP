@@ -1,7 +1,8 @@
 import sys
 import numpy as np
 import genInput
-from HEU import HEU
+import HEU
+import HEU_more_detour
 import networkx as nx
 from create_geojson import create_geojson
 
@@ -57,16 +58,17 @@ def set_demand_satisfied_in_route(route, demand_matrix, transfer_matrix, max_tra
 min_hop_count = int(sys.argv[1])
 max_hop_count = int(sys.argv[2])
 num_of_routes = int(sys.argv[3])
-# best_weight = [float(sys.argv[4])]
+best_weight = [float(sys.argv[4])]
 
-best_weight = [0.5, 1, 2, 4, 6, 20]
+# best_weight = [0.5, 1, 2, 6]
 
 for weight in best_weight:
     graph, demand_matrix = genInput.graph.copy(), genInput.demand_matrix.copy()
     depot_list = np.arange(graph.number_of_nodes())
-    routes, _ = HEU(graph, demand_matrix, weight, min_hop_count, max_hop_count, num_of_routes, depot_list)
+    # routes, _ = HEU_more_detour.HEU(graph, demand_matrix, weight, min_hop_count, max_hop_count, num_of_routes, depot_list)
+    routes, _ = HEU.HEU(graph, demand_matrix, weight, min_hop_count, max_hop_count, num_of_routes, depot_list)
 
-    print(len(routes))
+    # print(len(routes))
     travel_time_matrix, transfer_matrix = evaluate(routes, graph, demand_matrix)
     np.savetxt('D:\\learning\\workspace\\python\\TNDP\\TNDP-Heuristic\\result\\travel_time.csv', travel_time_matrix, delimiter=',', fmt="%.2f")
     np.savetxt('D:\\learning\\workspace\\python\\TNDP\\TNDP-Heuristic\\result\\transfer.csv', transfer_matrix, delimiter=',', fmt="%d")
@@ -77,10 +79,12 @@ for weight in best_weight:
 
     demand_matrix = genInput.demand_matrix
     total_demand = demand_matrix.sum()
+    route_id = 0
     for route in routes:
         assert(len(route) == len(set(route)))
         demand_matrix, satisfied_demand = set_demand_satisfied_in_route(route, demand_matrix, transfer_matrix, 1000)
-        print(route, satisfied_demand)
+        # print(('route %d' % route_id), route, satisfied_demand)
+        route_id += 1
     print('Unfulfilled demand: {}%'.format(demand_matrix.sum()/total_demand))
 
     demand_matrix = genInput.demand_matrix
@@ -98,5 +102,6 @@ for weight in best_weight:
         demand_matrix, _ = set_demand_satisfied_in_route(route, demand_matrix, transfer_matrix, 2)
     print('Two-transfer unfulfilled demand: {}%'.format(demand_matrix.sum()/total_demand))
 
+    # filename = 'D:\\learning\\workspace\\python\\TNDP\\TNDP-Heuristic\\result\\lines.geojson_%s_more_detour.json' % str(weight)
     filename = 'D:\\learning\\workspace\\python\\TNDP\\TNDP-Heuristic\\result\\lines.geojson_%s.json' % str(weight)
     create_geojson(routes, filename)
