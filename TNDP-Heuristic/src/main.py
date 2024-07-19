@@ -3,6 +3,7 @@ import numpy as np
 import genInput
 from SBS import SBS
 import logging
+import ast
 from datetime import datetime
 from create_geojson import create_geojson
 from eval_routes import eval_routes
@@ -12,6 +13,9 @@ current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 logging.basicConfig(filename=f"{root_dir}\\TNDP-Heuristic\\log\\log_{current_time}.log", level=logging.INFO)
 
 graph, demand_matrix = genInput.graph.copy(), genInput.demand_matrix.copy() 
+# depot_list = np.arange(graph.number_of_nodes())
+with open(f'{root_dir}\\preProcessing\\data\\stop_near_depot.txt', 'r') as f:
+    depot_list = np.array(ast.literal_eval(f.readline().strip()))
 
 max_hop_count = int(sys.argv[2])
 min_hop_count = int(sys.argv[1])

@@ -54,6 +54,8 @@ def set_demand_satisfied_in_route(route, demand_matrix, transfer_matrix, max_tra
     return demand_matrix, satisfied_demand
 
 def eval_routes(routes, graph, demand_matrix):
+    graph = graph.copy()
+    demand_matrix = demand_matrix.copy()
     travel_time_matrix, transfer_matrix = evaluate(routes, graph, demand_matrix)
     np.savetxt(f'{root_dir}\\TNDP-Heuristic\\result\\travel_time.csv', travel_time_matrix, delimiter=',', fmt="%.2f")
     np.savetxt(f'{root_dir}\\TNDP-Heuristic\\result\\transfer.csv', transfer_matrix, delimiter=',', fmt="%d")
