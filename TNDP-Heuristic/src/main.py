@@ -8,7 +8,7 @@ from create_geojson import create_geojson
 import networkx as nx
 
 current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-logging.basicConfig(filename=f"D:\\learning\\workspace\\python\\TNDP\\TNDP-Heuristic\\log\\log_{current_time}.log", level=logging.INFO)
+logging.basicConfig(filename=f"E:\\workspace\\python\\TNDP\\TNDP\\TNDP-Heuristic\\log\\log_{current_time}.log", level=logging.INFO)
 
 transfer_time = 5
 wait_time_at_O = 5
@@ -71,8 +71,8 @@ routes = SBS(graph, demand_matrix, min_hop_count, max_hop_count, num_of_routes, 
 
 print(len(routes))
 travel_time_matrix, transfer_matrix = evaluate(routes, graph, demand_matrix)
-np.savetxt('D:\\learning\\workspace\\python\\TNDP\\TNDP-Heuristic\\result\\travel_time.csv', travel_time_matrix, delimiter=',', fmt="%.2f")
-np.savetxt('D:\\learning\\workspace\\python\\TNDP\\TNDP-Heuristic\\result\\transfer.csv', transfer_matrix, delimiter=',', fmt="%d")
+np.savetxt('E:\\workspace\\python\\TNDP\\TNDP\\TNDP-Heuristic\\result\\travel_time.csv', travel_time_matrix, delimiter=',', fmt="%.2f")
+np.savetxt('E:\\workspace\\python\\TNDP\\TNDP\\TNDP-Heuristic\\result\\transfer.csv', transfer_matrix, delimiter=',', fmt="%d")
 ATT = travel_time_matrix[np.where(travel_time_matrix != -1)].mean()
 ATrans = transfer_matrix[np.where(transfer_matrix != -1)].mean()
 print('Average Travel Time: %f min\n' % ATT)
@@ -101,4 +101,5 @@ for route in routes:
     demand_matrix, _ = set_demand_satisfied_in_route(route, demand_matrix, transfer_matrix, 2)
 print('Two-transfer unfulfilled demand: {}%'.format(demand_matrix.sum()/total_demand))
 
-create_geojson(routes)
+filename = 'E:\\workspace\\python\\TNDP\\TNDP\\TNDP-Heuristic\\result\\lines-SBS.geojson'
+create_geojson(routes, filename)

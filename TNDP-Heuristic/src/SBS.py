@@ -11,7 +11,7 @@ import pandas as pd
 
 MAX_ITER = 200
 BEST_WEIGHT = 20
-sp_df = pd.read_csv('D:\\learning\\workspace\\python\\TNDP\\preProcessing\\data\\Binzhou_downtown_shortest_path_map.csv')
+sp_df = pd.read_csv('E:\\workspace\\python\\TNDP\\TNDP\\preProcessing\\data\\Binzhou_downtown_shortest_path_map.csv')
 
 class Individual:
     def __init__(self, routes, demand_matrix):
@@ -37,7 +37,7 @@ class Individual:
             # start_1 = time.perf_counter()
             # print('[CAL_TIME] Running time for calculate optimal travel time: %s s\n' %(start_1 - start_0))
         start_1 = time.perf_counter()
-        print('[CAL_TIME] Running time for cal_fitness: %s s\n' %(start_1 - start_0))
+        # print('[CAL_TIME] Running time for cal_fitness: %s s\n' %(start_1 - start_0))
         self.nonlinear_coeff = np.zeros(len(self.routes))
         for i in range(len(self.routes)):
             route = self.routes[i]
@@ -113,12 +113,12 @@ def get_trivial_successor(ind, graph, demand_matrix, min_hop_count, max_hop_coun
     ind.del_route(route, demand_matrix)
     for _ in range(count):
         if rand < p_del:
-            if len(route) == min_hop_count:
+            if len(route) <= min_hop_count:
                 route = add_node(graph, route, route[side])
             else:
                 route = del_node(route, route[side])
         else:
-            if len(route) == max_hop_count:
+            if len(route) >= max_hop_count:
                 route = del_node(route, route[side])
             else:
                 route = add_node(graph, route, route[side])
@@ -152,13 +152,13 @@ def SBS(graph, demand_matrix, min_hop_count, max_hop_count, num_of_routes, best_
     p_heu = 0.9
     BEST_WEIGHT = best_weight
     
-    # start_0 = time.perf_counter()
+    start_0 = time.perf_counter()
     population = list(get_initial_solution(pop_size, graph, demand_matrix, min_hop_count, max_hop_count, num_of_routes, depot_list))
     logging.info("[INIT-POP] Initialize population...\n")
     for i in range(len(population)):
         logging.info("[INIT-POP] Ind %d:\n%s\n" % (i, population[i]))
-    # start_1 = time.perf_counter()
-    # print('[get_initial_solution] Running time: %s s\n' %(start_1 - start_0))
+    start_1 = time.perf_counter()
+    print('[get_initial_solution] Running time: %s s\n' %(start_1 - start_0))
     best_ind = max(population, key=attrgetter('fitness'))
     logging.info("[INIT-POP] Best Ind in Iter 0:\n%s\n" % best_ind)
 

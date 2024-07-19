@@ -70,8 +70,8 @@ for weight in best_weight:
 
     # print(len(routes))
     travel_time_matrix, transfer_matrix = evaluate(routes, graph, demand_matrix)
-    np.savetxt('D:\\learning\\workspace\\python\\TNDP\\TNDP-Heuristic\\result\\travel_time.csv', travel_time_matrix, delimiter=',', fmt="%.2f")
-    np.savetxt('D:\\learning\\workspace\\python\\TNDP\\TNDP-Heuristic\\result\\transfer.csv', transfer_matrix, delimiter=',', fmt="%d")
+    np.savetxt('E:\\workspace\\python\\TNDP\\TNDP\\TNDP-Heuristic\\result\\travel_time.csv', travel_time_matrix, delimiter=',', fmt="%.2f")
+    np.savetxt('E:\\workspace\\python\\TNDP\\TNDP\\TNDP-Heuristic\\result\\transfer.csv', transfer_matrix, delimiter=',', fmt="%d")
     ATT = travel_time_matrix[np.where(travel_time_matrix != -1)].mean()
     ATrans = transfer_matrix[np.where(transfer_matrix != -1)].mean()
     print('Average Travel Time: %f min\n' % ATT)
@@ -103,5 +103,5 @@ for weight in best_weight:
     print('Two-transfer unfulfilled demand: {}%'.format(demand_matrix.sum()/total_demand))
 
     # filename = 'D:\\learning\\workspace\\python\\TNDP\\TNDP-Heuristic\\result\\lines.geojson_%s_more_detour.json' % str(weight)
-    filename = 'D:\\learning\\workspace\\python\\TNDP\\TNDP-Heuristic\\result\\lines.geojson_%s.json' % str(weight)
+    filename = 'E:\\workspace\\python\\TNDP\\TNDP-Heuristic\\result\\lines.geojson_%s.json' % str(weight)
     create_geojson(routes, filename)

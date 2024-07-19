@@ -5,7 +5,7 @@ from geographiclib.geodesic import Geodesic
 # import matplotlib.pyplot as plt
 # import genInput
 
-stop_df = pd.read_csv('D:\\learning\\workspace\\python\\TNDP\\preProcessing\\data\\unique_stop_downtown.csv')
+stop_df = pd.read_csv('E:\\workspace\\python\\TNDP\\TNDP\\preProcessing\\data\\unique_stop_downtown.csv')
 def get_highest_demand_pair(demand_matrix):
     return np.unravel_index(np.argmax(demand_matrix), demand_matrix.shape)
 
@@ -98,12 +98,10 @@ def get_route_satisfying_constraint(graph, demand_matrix, weight, min_hop_count,
 def get_route(source, dest, graph, demand_matrix, weight, min_hop_count, max_hop_count):
     graph = graph.copy()
     demand_matrix = demand_matrix.copy()
+    taboo_list = []
     route = [source]
+    route_chunk = get_best_route_between(source, dest, graph, demand_matrix, weight)
     while True:
-        try:
-            route_chunk = get_best_route_between(source, dest, graph, demand_matrix, weight)
-        except nx.NetworkXNoPath as e:
-            break
         route_chunk = route_chunk[1:]
         if len(route) + len(route_chunk) <= max_hop_count:
             route.extend(route_chunk)
@@ -111,9 +109,12 @@ def get_route(source, dest, graph, demand_matrix, weight, min_hop_count, max_hop
             break
         disconnect_nodes_in_route_from_graph(graph, route[:-1])
         demand_matrix, _ = set_demand_satisfied_in_route(demand_matrix, route)
-        source, dest = dest, get_highest_demand_destination_from(dest, demand_matrix)
-        if demand_matrix[source][dest] == 0.:
+        source = dest
+        dest, route_chunk = get_highest_demand_destination_from(dest, demand_matrix, route, taboo_list, graph, weight)
+        # if demand_matrix[source][dest] == 0 or dest == -1:
+        if dest == -1:
             break
+    # print(route)
     return route
 
 
