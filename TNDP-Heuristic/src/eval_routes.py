@@ -1,6 +1,8 @@
 import numpy as np
 import networkx as nx
+import ast
 from path import root_dir
+import genInput
 
 transfer_time = 5
 wait_time_at_O = 5
@@ -86,3 +88,12 @@ def eval_routes(routes, graph, demand_matrix):
     for route in routes:
         demand_matrix, _ = set_demand_satisfied_in_route(route, demand_matrix, transfer_matrix, 2)
     print('Two-transfer unfulfilled demand: {}%'.format(demand_matrix.sum()/total_demand))
+
+if __name__ == '__main__':
+    graph, demand_matrix = genInput.graph.copy(), genInput.demand_matrix.copy()
+    routes = []
+    with open(f'{root_dir}\\TNDP-Heuristic\\result\\routes_0718.txt', 'r') as f:
+        for line in f:
+            routes.append(ast.literal_eval(line.strip()))
+        print(routes)
+    eval_routes(routes, graph, demand_matrix)
