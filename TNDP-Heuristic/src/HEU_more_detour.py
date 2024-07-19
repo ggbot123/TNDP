@@ -2,10 +2,9 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 from geographiclib.geodesic import Geodesic
-# import matplotlib.pyplot as plt
-# import genInput
+from path import root_dir
 
-stop_df = pd.read_csv('D:\\learning\\workspace\\python\\TNDP\\preProcessing\\data\\unique_stop_downtown.csv')
+stop_df = pd.read_csv(f'{root_dir}\\preProcessing\\data\\unique_stop_downtown.csv')
 def get_highest_demand_pair(demand_matrix):
     return np.unravel_index(np.argmax(demand_matrix), demand_matrix.shape)
 

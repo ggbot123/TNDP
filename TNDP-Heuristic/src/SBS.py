@@ -8,10 +8,11 @@ import copy
 import time
 from tqdm import tqdm
 import pandas as pd
+from path import root_dir
 
 MAX_ITER = 200
 BEST_WEIGHT = 20
-sp_df = pd.read_csv('E:\\workspace\\python\\TNDP\\TNDP\\preProcessing\\data\\Binzhou_downtown_shortest_path_map.csv')
+sp_df = pd.read_csv(f'{root_dir}\\preProcessing\\data\\Binzhou_downtown_shortest_path_map.csv')
 
 class Individual:
     def __init__(self, routes, demand_matrix):

@@ -1,10 +1,10 @@
-import sys
 import json
 import networkx as nx
 import numpy as np
 from pathlib import Path
 import pandas as pd
 import matplotlib.pyplot as plt
+from path import root_dir
 
 def read_matrix(path):
     text = path.read_text()
@@ -26,14 +26,14 @@ def save_graph_as_json(distance_matrix, file_path):
         json.dump(data, f, indent=4, ensure_ascii=False)
     return graph
 
-dist_file = Path('D:\\learning\\workspace\\python\\TNDP\\TNDP-Heuristic\\data\\Mandl\\MandlDistances.json')
-demand_file = Path('D:\\learning\\workspace\\python\\TNDP\\TNDP-Heuristic\\data\\Mandl\\MandlOriginDestination.txt')
-# dist_file = Path('D:\\learning\\workspace\\python\\TNDP\\TNDP-Heuristic\\data\\Mumford\\M3Distances.json')
-# demand_file = Path('D:\\learning\\workspace\\python\\TNDP\\TNDP-Heuristic\\data\\Mumford\\M3OriginDestination.txt')
-# dist_file = Path('D:\\learning\\workspace\\python\\TNDP\\preProcessing\\data\\manhattan_distance_matrix.csv')
-# demand_file = Path('D:\\learning\\workspace\\python\\TNDP\\preProcessing\\data\\Binzhou_route_OD.csv')
-dist_file = Path('D:\\learning\\workspace\\python\\TNDP\\preProcessing\\data\\manhattan_distance_matrix_downtown.csv')
-demand_file = Path('D:\\learning\\workspace\\python\\TNDP\\preProcessing\\data\\Binzhou_route_OD_downtown.csv')
+# dist_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Mandl\\MandlDistances.json')
+# demand_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Mandl\\MandlOriginDestination.txt')
+# dist_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Mumford\\M3Distances.json')
+# demand_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Mumford\\M3OriginDestination.txt')
+# dist_file = Path(f'{root_dir}\\preProcessing\\data\\manhattan_distance_matrix.csv')
+# demand_file = Path(f'{root_dir}\\preProcessing\\data\\Binzhou_route_OD.csv')
+dist_file = Path(f'{root_dir}\\preProcessing\\data\\manhattan_distance_matrix_downtown.csv')
+demand_file = Path(f'{root_dir}\\preProcessing\\data\\Binzhou_route_OD_downtown.csv')
 
 if dist_file.suffix == '.json':
     with open(dist_file) as f:
