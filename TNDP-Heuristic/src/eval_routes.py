@@ -92,7 +92,9 @@ def eval_routes(routes, graph, demand_matrix):
 if __name__ == '__main__':
     graph, demand_matrix = genInput.graph.copy(), genInput.demand_matrix.copy()
     routes = []
-    with open(f'{root_dir}\\TNDP-Heuristic\\result\\routes_0718.txt', 'r') as f:
+    # filename = f'{root_dir}\\TNDP-Heuristic\\result\\routes_0718.txt'
+    filename = f'{root_dir}\\TNDP-Heuristic\\result\\routes-Origin.txt'
+    with open(filename, 'r') as f:
         for line in f:
             routes.append(ast.literal_eval(line.strip()))
         print(routes)

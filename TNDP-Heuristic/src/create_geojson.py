@@ -55,8 +55,8 @@ def create_geojson(routes, filename):
 
 if __name__ == '__main__':
     routes = []
-    with open('../result/routes_0718.txt', 'r') as f:
+    with open(f'{root_dir}\\TNDP-Heuristic\\result\\routes-Origin.txt', 'r') as f:
         for line in f:
             routes.append(ast.literal_eval(line.strip()))
         print(routes)
-    create_geojson(routes, filename=f'{root_dir}\\TNDP-Heuristic\\result\\routes-SBS-0718.geojson')
+    create_geojson(routes, filename=f'{root_dir}\\TNDP-Heuristic\\result\\routes-Origin.geojson')
