@@ -1,6 +1,6 @@
 import numpy as np
 import networkx as nx
-from HEU import HEU, get_route
+from HEU import HEU, get_route, set_demand_satisfied_in_route
 from operator import attrgetter
 import random
 import logging
@@ -9,11 +9,15 @@ import time
 from tqdm import tqdm
 import pandas as pd
 import matplotlib.pyplot as plt
+import ast
 from path import root_dir
 
-MAX_ITER = 200
+MAX_ITER = 1
 BEST_WEIGHT = 20
 sp_df = pd.read_csv(f'{root_dir}\\preProcessing\\data\\Binzhou_downtown_shortest_path_map.csv')
+transfer_time = 15
+wait_time_at_O = 5
+velocity = 4    # min/km
 
 class Individual:
     def __init__(self, routes, demand_matrix):
@@ -23,7 +27,7 @@ class Individual:
         transit_graph = generate_transit_graph(self.routes, graph)
         node_num = graph.number_of_nodes()
         cost_matrix = np.zeros_like(demand_matrix)
-        start_0 = time.perf_counter()
+        # start_0 = time.perf_counter()
         for i in range(node_num):
             transit_graph.add_node(i)
             # start_0 = time.perf_counter()
@@ -38,15 +42,16 @@ class Individual:
                     cost_matrix[i][j] = demand_matrix[i][j] * (50 + optimal_travel_time_between(graph, i, j))
             # start_1 = time.perf_counter()
             # print('[CAL_TIME] Running time for calculate optimal travel time: %s s\n' %(start_1 - start_0))
-        start_1 = time.perf_counter()
+        # start_1 = time.perf_counter()
         # print('[CAL_TIME] Running time for cal_fitness: %s s\n' %(start_1 - start_0))
-        self.nonlinear_coeff = np.zeros(len(self.routes))
-        for i in range(len(self.routes)):
-            route = self.routes[i]
-            route_len_straight = nx.dijkstra_path_length(graph, route[0], route[-1], weight='weight')
-            route_len = sum([graph[route[j]][route[j+1]]['weight'] for j in range(len(route)-1)])
-            self.nonlinear_coeff[i] = route_len/route_len_straight
-        self.fitness = - (cost_matrix.sum() + sum([(coeff-1)*10000 if coeff < 2 else 1000000000 for coeff in self.nonlinear_coeff]))
+        self.detour_coeff = np.zeros(len(self.routes))
+        # for i in range(len(self.routes)):
+        #     route = self.routes[i]
+        #     route_len_straight = nx.dijkstra_path_length(graph, route[0], route[-1], weight='weight')
+        #     route_len = sum([graph[route[j]][route[j+1]]['weight'] for j in range(len(route)-1)])
+        #     self.detour_coeff[i] = route_len/route_len_straight
+        # self.fitness = - (cost_matrix.sum() + sum([(coeff-1)*1000 if coeff < 2 else 1000000000 for coeff in self.detour_coeff]))
+        self.fitness = - cost_matrix.sum()
         return self
     def del_route(self, route, demand_matrix):
         self.routes.remove(route)
@@ -60,7 +65,7 @@ class Individual:
                 self.demand_matrix[i][j] = 0
     def __str__(self):
         route_str = '\n    '.join(str(route) for route in self.routes)
-        return "routes: %s\nfitness: %s\nmean nonlinear coeff: %s\n" % (route_str, str(self.fitness), str(self.nonlinear_coeff.mean()))
+        return "routes: %s\nfitness: %s\nmean detour coeff: %s\n" % (route_str, str(self.fitness), str(self.detour_coeff.mean()))
 
 def optimal_travel_time_between(graph, source, dest):
     # return nx.dijkstra_path_length(graph, source, dest, weight='weight')
@@ -78,17 +83,22 @@ def generate_transit_graph(routes, graph):
     for i in range(graph.number_of_nodes()):
         selected_nodes = [node for node in nodes if node.startswith(str(i) + '_')]
         for j in selected_nodes:
-            transit_graph.add_edge(i, j, weight=2.5)  # 起始等待时间，主要是便于对多条线路的同名节点去中心化
+            transit_graph.add_edge(i, j, weight=wait_time_at_O/(2*velocity))  # 起始等待时间，主要是便于对多条线路的同名节点去中心化
             for k in selected_nodes:
                 if j != k:
-                    transit_graph.add_edge(j, k, weight=5)
+                    transit_graph.add_edge(j, k, weight=transfer_time/velocity)
     return transit_graph
         
 def generate_weight():
     return max(np.random.normal(loc=1, scale=0.5) * BEST_WEIGHT, 0)
 
-def get_initial_solution(pop_size, graph, demand_matrix, min_hop_count, max_hop_count, num_of_routes, depot_list):
-    for _ in range(pop_size):
+def get_initial_solution(pop_size, graph, demand_matrix, min_hop_count, max_hop_count, num_of_routes, depot_list, specified_routes_list):
+    demand_matrix_rest = demand_matrix.copy()
+    for routes in specified_routes_list:
+        for route in routes:
+            demand_matrix_rest, _ = set_demand_satisfied_in_route(demand_matrix_rest, route)
+        yield Individual(routes, demand_matrix_rest).cal_fitness(graph, demand_matrix)
+    for _ in range(pop_size - len(specified_routes_list)):
         weight = generate_weight()
         routes, demand_matrix_rest = HEU(graph, demand_matrix, weight, min_hop_count, max_hop_count, num_of_routes, depot_list)
         yield Individual(routes, demand_matrix_rest).cal_fitness(graph, demand_matrix)
@@ -133,7 +143,7 @@ def get_heuristic_successor(ind, graph, demand_matrix, min_hop_count, max_hop_co
     source, dest = route[0], route[-1]
     ind.del_route(route, demand_matrix)
     weight = generate_weight()
-    new_route = get_route(source, dest, graph, demand_matrix, weight, min_hop_count, max_hop_count)
+    new_route = get_route(source, dest, graph, ind.demand_matrix, weight, min_hop_count, max_hop_count)
     ind.add_route(new_route)
     ind.cal_fitness(graph, demand_matrix)
     return ind
@@ -146,7 +156,7 @@ def tournament_select(successors, pop_size, tourn_size):
         selected.append(group_best_ind)
     return selected
 
-def SBS(graph, demand_matrix, min_hop_count, max_hop_count, num_of_routes, best_weight, depot_list):
+def SBS(graph, demand_matrix, min_hop_count, max_hop_count, num_of_routes, best_weight, depot_list, ini_routes_path):
     pop_size = 10
     neib_size = 20
     tourn_size = 180
@@ -155,13 +165,20 @@ def SBS(graph, demand_matrix, min_hop_count, max_hop_count, num_of_routes, best_
     BEST_WEIGHT = best_weight
     best_fitness = []
     
-    start_0 = time.perf_counter()
-    population = list(get_initial_solution(pop_size, graph, demand_matrix, min_hop_count, max_hop_count, num_of_routes, depot_list))
+    # start_0 = time.perf_counter()
     logging.info("[INIT-POP] Initialize population...\n")
+    specified_routes_list = []
+    for filename in ini_routes_path:
+        specified_routes = []
+        with open(filename, 'r') as f:
+            for line in f:
+                specified_routes.append(ast.literal_eval(line.strip()))
+        specified_routes_list.append(specified_routes)
+    population = list(get_initial_solution(pop_size, graph, demand_matrix, min_hop_count, max_hop_count, num_of_routes, depot_list, specified_routes_list))
     for i in range(len(population)):
         logging.info("[INIT-POP] Ind %d:\n%s\n" % (i, population[i]))
-    start_1 = time.perf_counter()
-    print('[get_initial_solution] Running time: %s s\n' %(start_1 - start_0))
+    # start_1 = time.perf_counter()
+    # print('[get_initial_solution] Running time: %s s\n' %(start_1 - start_0))
     best_ind = max(population, key=attrgetter('fitness'))
     logging.info("[INIT-POP] Best Ind in Iter 0:\n%s\n" % best_ind)
     best_fitness.append(best_ind.fitness)
