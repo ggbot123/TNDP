@@ -27,6 +27,7 @@ def get_highest_demand_destination_from(source, demand_matrix, route, taboo_list
     return -1, []
 
 def not_detour(source, dest, route):
+    return 1
     old_route_direction = [Geodesic.WGS84.Inverse(stop_df.loc[route[-(i+1)], '纬度'], stop_df.loc[route[-(i+1)], '经度'],
                                                   stop_df.loc[route[-i], '纬度'], stop_df.loc[route[-i], '经度'])['azi1'] for i in range(1,3) if i < len(route)]
     new_route_direction = Geodesic.WGS84.Inverse(stop_df.loc[source, '纬度'], stop_df.loc[source, '经度'], stop_df.loc[dest, '纬度'], stop_df.loc[dest, '经度'])['azi1']

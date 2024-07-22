@@ -32,8 +32,10 @@ def save_graph_as_json(distance_matrix, file_path):
 # demand_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Mumford\\M3OriginDestination.txt')
 # dist_file = Path(f'{root_dir}\\preProcessing\\data\\manhattan_distance_matrix.csv')
 # demand_file = Path(f'{root_dir}\\preProcessing\\data\\Binzhou_route_OD.csv')
-dist_file = Path(f'{root_dir}\\preProcessing\\data\\manhattan_distance_matrix_downtown.csv')
-demand_file = Path(f'{root_dir}\\preProcessing\\data\\Binzhou_route_OD_downtown.csv')
+# dist_file = Path(f'{root_dir}\\preProcessing\\data\\manhattan_distance_matrix_downtown.csv')
+# demand_file = Path(f'{root_dir}\\preProcessing\\data\\Binzhou_route_OD_downtown.csv')
+dist_file = Path(f'{root_dir}\\preProcessing\\data\\regional_dist_matrix.csv')
+demand_file = Path(f'{root_dir}\\preProcessing\\data\\regional_OD.csv')
 
 if dist_file.suffix == '.json':
     with open(dist_file) as f:

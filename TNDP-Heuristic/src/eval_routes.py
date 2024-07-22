@@ -36,7 +36,7 @@ def evaluate(routes, graph, demand_matrix):
         cost_dict, path_dict = nx.single_source_dijkstra(transit_graph, i, weight='weight')
         for j in range(node_num):
             if j in cost_dict:
-                travel_time_matrix[i][j] = cost_dict[j]
+                travel_time_matrix[i][j] = cost_dict[j]*velocity
                 transfer_matrix[i][j] = len(np.unique(np.array([s.split('_')[1] for s in path_dict[j] if '_' in str(s)]))) - 1
             else:
                 travel_time_matrix[i][j] = -1
@@ -56,13 +56,18 @@ def set_demand_satisfied_in_route(route, demand_matrix, transfer_matrix, max_tra
 def eval_routes(routes, graph, demand_matrix):
     graph = graph.copy()
     demand_matrix = demand_matrix.copy()
+    total_demand = demand_matrix.sum()
     travel_time_matrix, transfer_matrix = evaluate(routes, graph, demand_matrix)
     np.savetxt(f'{root_dir}\\TNDP-Heuristic\\result\\travel_time.csv', travel_time_matrix, delimiter=',', fmt="%.2f")
     np.savetxt(f'{root_dir}\\TNDP-Heuristic\\result\\transfer.csv', transfer_matrix, delimiter=',', fmt="%d")
-    ATT = travel_time_matrix[np.where(travel_time_matrix != -1)].mean()
-    ATrans = transfer_matrix[np.where(transfer_matrix != -1)].mean()
-    print('Average Travel Time: %f min\n' % ATT)
-    print('Average Transfer: %f\n' % ATrans)
+    travel_time_matrix_weighted = travel_time_matrix * demand_matrix
+    transfer_matrix_weighted = transfer_matrix * demand_matrix
+    # ATT = travel_time_matrix[np.where(travel_time_matrix != -1)].mean()
+    # ATrans = transfer_matrix[np.where(transfer_matrix != -1)].mean()
+    ATT = travel_time_matrix_weighted[np.where(travel_time_matrix_weighted >= 0)].sum()/total_demand
+    ATrans = transfer_matrix_weighted[np.where(transfer_matrix_weighted >= 0)].sum()/total_demand
+    print('\nAverage Travel Time: %f min' % ATT)
+    print('Average Transfer: %f' % ATrans)
 
     demand_matrix_all = demand_matrix
     total_demand = demand_matrix_all.sum()
@@ -72,7 +77,7 @@ def eval_routes(routes, graph, demand_matrix):
     for route in routes:
         assert(len(route) == len(set(route)))
         demand_matrix, satisfied_demand = set_demand_satisfied_in_route(route, demand_matrix, transfer_matrix, 1000)
-        # print(('route %d' % route_id), route, satisfied_demand)
+        print(('route %d' % route_id), route, satisfied_demand)
         route_id += 1
     print('Unfulfilled demand: {}%'.format(demand_matrix.sum()/total_demand))
 
