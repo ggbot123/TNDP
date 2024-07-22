@@ -8,6 +8,7 @@ import copy
 import time
 from tqdm import tqdm
 import pandas as pd
+import matplotlib.pyplot as plt
 from path import root_dir
 
 MAX_ITER = 200
@@ -152,6 +153,7 @@ def SBS(graph, demand_matrix, min_hop_count, max_hop_count, num_of_routes, best_
     p_del = 0.4
     p_heu = 0.9
     BEST_WEIGHT = best_weight
+    best_fitness = []
     
     start_0 = time.perf_counter()
     population = list(get_initial_solution(pop_size, graph, demand_matrix, min_hop_count, max_hop_count, num_of_routes, depot_list))
@@ -162,7 +164,8 @@ def SBS(graph, demand_matrix, min_hop_count, max_hop_count, num_of_routes, best_
     print('[get_initial_solution] Running time: %s s\n' %(start_1 - start_0))
     best_ind = max(population, key=attrgetter('fitness'))
     logging.info("[INIT-POP] Best Ind in Iter 0:\n%s\n" % best_ind)
-
+    best_fitness.append(best_ind.fitness)
+    
     for iter_cnt in tqdm(range(MAX_ITER)):
         logging.info("[Iter %d] Start evolutioning...\n" % iter_cnt)
         successors = []
@@ -195,4 +198,11 @@ def SBS(graph, demand_matrix, min_hop_count, max_hop_count, num_of_routes, best_
         logging.info("[SELECT-CAND] Candidate Best Ind in Iter %d:\n%s\n" %(iter_cnt, candidate_best_ind))
         best_ind = max([candidate_best_ind, best_ind], key=attrgetter('fitness'))
         logging.info("[SELECT-BEST] Best Ind in Iter %d:\n%s\n" %(iter_cnt, best_ind))
+        best_fitness.append(best_ind.fitness)
+    plt.plot(np.arange(MAX_ITER+1), best_fitness)
+    plt.xlabel('iter')
+    plt.ylabel('fitness')
+    plt.title('fitness variation')
+    plt.grid(True)
+    plt.savefig(f'{root_dir}\\TNDP-Heuristic\\result\\fitness_variation.png')
     return best_ind

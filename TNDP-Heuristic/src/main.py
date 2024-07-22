@@ -26,5 +26,5 @@ depot_list = np.arange(graph.number_of_nodes())
 routes = SBS(graph, demand_matrix, min_hop_count, max_hop_count, num_of_routes, best_weight, depot_list).routes
 eval_routes(routes, graph, demand_matrix)
 
-filename = f'{root_dir}\\TNDP-Heuristic\\result\\lines-SBS.geojson'
+filename = f'{root_dir}\\TNDP-Heuristic\\result\\routes-SBS-{current_time}.geojson'
 create_geojson(routes, filename)
