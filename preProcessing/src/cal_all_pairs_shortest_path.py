@@ -23,7 +23,8 @@ def save_graph_as_json(distance_matrix, file_path):
         json.dump(data, f, indent=4, ensure_ascii=False)
     return graph
 
-dist_file = Path(f'{root_dir}\\preProcessing\\data\\manhattan_distance_matrix_downtown.csv')
+# dist_file = Path(f'{root_dir}\\preProcessing\\data\\manhattan_distance_matrix_downtown.csv')
+dist_file = Path(f'{root_dir}\\preProcessing\\data\\regional_dist_matrix.csv')
 if dist_file.suffix == '.json':
     with open(dist_file) as f:
         data = json.load(f)
@@ -40,4 +41,5 @@ node_num = graph.number_of_nodes()
 cost_dict = dict(nx.all_pairs_dijkstra_path_length(graph), weight='weight')
 shortest_path_matrix = np.array([[cost_dict[i][j] for j in range(node_num)] for i in range(node_num)])
 shortest_path = pd.DataFrame(shortest_path_matrix)
-shortest_path.to_csv(f'{root_dir}\\preProcessing\\data\\Binzhou_downtown_shortest_path_map.csv', index=False)
+# shortest_path.to_csv(f'{root_dir}\\preProcessing\\data\\Binzhou_downtown_shortest_path_map.csv', index=False)
+shortest_path.to_csv(f'{root_dir}\\preProcessing\\data\\region_shortest_path_map.csv', index=False)
