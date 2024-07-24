@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import ast
 from path import root_dir
 
-MAX_ITER = 1
+MAX_ITER = 200
 # sp_df = pd.read_csv(f'{root_dir}\\preProcessing\\data\\Binzhou_downtown_shortest_path_map.csv')
 # sp_df = pd.read_csv(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\regional_shortest_path_map.csv')
 sp_df = pd.read_csv(f'{root_dir}\\TNDP-Heuristic\\data\\Mandl\\shortest_path_map.csv')
@@ -141,7 +141,7 @@ def get_trivial_successor(ind, graph, demand_matrix, min_hop_count, max_hop_coun
                 route = del_node(route, route[side])
             else:
                 route = add_node(graph, route, route[side])
-    ind.add_route(route)
+    ind.add_route(route, demand_matrix)
     ind.cal_fitness(graph, demand_matrix)
     return ind
 

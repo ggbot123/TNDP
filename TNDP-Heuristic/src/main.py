@@ -18,7 +18,7 @@ max_hop_count = int(sys.argv[2])
 min_hop_count = int(sys.argv[1])
 num_of_routes = int(sys.argv[3])
 best_weight = float(sys.argv[4])
-start_from_depot = bool(sys.argv[5])
+start_from_depot = sys.argv[5]
 
 graph, demand_matrix = genInput.graph.copy(), genInput.demand_matrix.copy() 
 
