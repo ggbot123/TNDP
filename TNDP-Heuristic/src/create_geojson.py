@@ -4,7 +4,7 @@ import ast
 from path import root_dir
 
 # stop_df = pd.read_csv(f'{root_dir}\\preProcessing\\data\\unique_stop_downtown.csv')
-stop_df = pd.read_csv(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\TAZ_centroids.csv')
+stop_df = pd.read_csv(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\TAZ_revised_centroids.csv')
 
 def dict_to_geojson(route_dict, location_dict):
     features = []

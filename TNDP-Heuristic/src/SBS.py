@@ -14,9 +14,9 @@ from path import root_dir
 
 MAX_ITER = 200
 # sp_df = pd.read_csv(f'{root_dir}\\preProcessing\\data\\Binzhou_downtown_shortest_path_map.csv')
-sp_df = pd.read_csv(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\revised_regional_shortest_path_map.csv')
+sp_df = pd.read_csv(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\revised_region_shortest_path_map.csv')
 # sp_df = pd.read_csv(f'{root_dir}\\TNDP-Heuristic\\data\\Mandl\\shortest_path_map.csv')
-
+BEST_WEIGHT = 1
 transfer_time = 15
 wait_time_at_O = 5
 velocity = 4    # min/km
@@ -95,8 +95,8 @@ def generate_transit_graph(routes, graph):
     return transit_graph
         
 def generate_weight():
-    # return max(np.random.normal(loc=1, scale=0.5) * BEST_WEIGHT, 0)
-    return np.random.rand()
+    return max(np.random.normal(loc=1, scale=0.5) * BEST_WEIGHT, 0)
+    # return np.random.rand()
 
 def get_initial_solution(pop_size, graph, demand_matrix, min_hop_count, max_hop_count, num_of_routes, depot_list, specified_routes_list):
     for routes in specified_routes_list:
@@ -127,7 +127,8 @@ def del_node(route, side):
 def get_trivial_successor(ind, graph, demand_matrix, min_hop_count, max_hop_count, p_del):
     route = random.choice(ind.routes)
     count = np.random.randint(0, len(route)/2 + 1) # 目前：包括1/2路线长度的下界
-    side = random.choice([0, -1])
+    # side = random.choice([0, -1])
+    side = -1
     rand = np.random.rand()
     ind.del_route(route, demand_matrix)
     for _ in range(count):
