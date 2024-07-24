@@ -6,14 +6,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from path import root_dir
 
-dist_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Mandl\\MandlDistances.json')
-demand_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Mandl\\MandlOriginDestination.txt')
+# dist_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Mandl\\MandlDistances.json')
+# demand_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Mandl\\MandlOriginDestination.txt')
 # dist_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Mumford\\M3Distances.json')
 # demand_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Mumford\\M3OriginDestination.txt')
 # dist_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_stops\\manhattan_distance_matrix_downtown.csv')
 # demand_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_stops\\Binzhou_route_OD_downtown.csv')
-# dist_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\regional_dist_matrix.csv')
-# demand_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\regional_OD.csv')
+dist_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\revised_regional_dist_matrix.csv')
+demand_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\regional_OD.csv')
 
 def read_matrix(path):
     text = path.read_text()

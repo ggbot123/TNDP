@@ -1,0 +1,14 @@
+{
+"type": "FeatureCollection",
+"name": "future_depot",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "id": 1, "经度": 118.055, "纬度": 37, "Latitute": 37.367 }, "geometry": { "type": "MultiPoint", "coordinates": [ [ 118.055047057802312, 37.367421532478559 ] ] } },
+{ "type": "Feature", "properties": { "id": 2, "经度": 117.991, "纬度": 37, "Latitute": 37.357 }, "geometry": { "type": "MultiPoint", "coordinates": [ [ 117.991290265950582, 37.356534058840609 ] ] } },
+{ "type": "Feature", "properties": { "id": 3, "经度": 117.956, "纬度": 37, "Latitute": 37.363 }, "geometry": { "type": "MultiPoint", "coordinates": [ [ 117.955954704506468, 37.362678566062748 ] ] } },
+{ "type": "Feature", "properties": { "id": 4, "经度": 117.933, "纬度": 37, "Latitute": 37.41 }, "geometry": { "type": "MultiPoint", "coordinates": [ [ 117.932893876158246, 37.410136225865294 ] ] } },
+{ "type": "Feature", "properties": { "id": 5, "经度": 117.992, "纬度": 37, "Latitute": 37.431 }, "geometry": { "type": "MultiPoint", "coordinates": [ [ 117.991864827925312, 37.430857100529437 ] ] } },
+{ "type": "Feature", "properties": { "id": 6, "经度": 118.007, "纬度": 37, "Latitute": 37.403 }, "geometry": { "type": "MultiPoint", "coordinates": [ [ 118.007208244295114, 37.403030902537836 ] ] } },
+{ "type": "Feature", "properties": { "id": 7, "经度": 117.966, "纬度": 37, "Latitute": 37.405 }, "geometry": { "type": "MultiPoint", "coordinates": [ [ 117.965944247930224, 37.405095146203998 ] ] } }
+]
+}

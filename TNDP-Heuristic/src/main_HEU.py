@@ -18,8 +18,8 @@ start_from_depot = sys.argv[5]
 graph, demand_matrix = genInput.graph.copy(), genInput.demand_matrix.copy()
 
 if start_from_depot == 'True':
-    # with open(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\stop_near_depot.txt', 'r') as f:
-    with open(f'{root_dir}\\TNDP-Heuristic\\data\\Mandl\\stop_near_depot.txt', 'r') as f:
+    with open(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\stop_near_depot.txt', 'r') as f:
+    # with open(f'{root_dir}\\TNDP-Heuristic\\data\\Mandl\\stop_near_depot.txt', 'r') as f:
         depot_list = np.array(ast.literal_eval(f.readline().strip()))
 else:
     depot_list = np.arange(graph.number_of_nodes())
@@ -34,4 +34,4 @@ for weight in best_weight:
     # filename = f'{root_dir}\\TNDP-Heuristic\\result\\routes-HEU_w={str(weight)}.geojson'
     filename = f'{root_dir}\\TNDP-Heuristic\\result\\routes-from-depots-HEU_w={str(weight)}.geojson'
     # filename = f'{root_dir}\\TNDP-Heuristic\\result\\routes-from-depots-more-detour-HEU_w={str(weight)}.geojson'
-    # create_geojson(routes, filename)
+    create_geojson(routes, filename)

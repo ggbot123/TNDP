@@ -14,8 +14,8 @@ from path import root_dir
 
 MAX_ITER = 200
 # sp_df = pd.read_csv(f'{root_dir}\\preProcessing\\data\\Binzhou_downtown_shortest_path_map.csv')
-# sp_df = pd.read_csv(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\regional_shortest_path_map.csv')
-sp_df = pd.read_csv(f'{root_dir}\\TNDP-Heuristic\\data\\Mandl\\shortest_path_map.csv')
+sp_df = pd.read_csv(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\revised_regional_shortest_path_map.csv')
+# sp_df = pd.read_csv(f'{root_dir}\\TNDP-Heuristic\\data\\Mandl\\shortest_path_map.csv')
 
 transfer_time = 15
 wait_time_at_O = 5

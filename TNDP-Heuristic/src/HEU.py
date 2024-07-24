@@ -6,9 +6,9 @@ import genInput
 from path import root_dir
 
 # stop_df = pd.read_csv(f'{root_dir}\\preProcessing\\data\\unique_stop_downtown.csv')
-stop_df = pd.read_csv(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\TAZ_centroids.csv')
+stop_df = pd.read_csv(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\TAZ_revised_centroids.csv')
 max_demand = np.max(genInput.demand_matrix)
-max_dis = max(data['weight'] for u,v,data in genInput.graph.edges(data=True))
+# max_dis = max(data['weight'] for u,v,data in genInput.graph.edges(data=True))
 
 def get_highest_demand_pair(demand_matrix):
     return np.unravel_index(np.argmax(demand_matrix), demand_matrix.shape)
@@ -56,18 +56,36 @@ def disconnect_nodes_in_route_from_graph(graph, route):
         graph.remove_edges_from(edges_to_remove)
 
 
+# def importance_of_node_in_between(source, dest, demand_matrix):
+#     demand_from_source = demand_matrix[source, :]
+#     demand_to_dest = demand_matrix[:, dest]
+#     return (demand_from_source + demand_to_dest)/max_demand
+
+
+# def get_best_route_between(source, dest, graph, demand_matrix, weight):
+#     node_importance = importance_of_node_in_between(source, dest, demand_matrix)
+#     node_cost = 1 / (1.0 + weight*node_importance)
+#     # node_cost = 1 / (1.0 + node_importance)
+#     w = weight
+#     best_route = nx.algorithms.shortest_paths.weighted.dijkstra_path(graph, source, dest, 
+#                                                                      weight=lambda u,v,d: 0.5*(node_cost[u] + node_cost[v])*d['weight'])
+#                                                                     #  weight=lambda u,v,d: 0.5*w*(node_cost[u] + node_cost[v]) + (1-w)*d['weight'])
+    
+#     return best_route
+
 def importance_of_node_in_between(source, dest, demand_matrix):
     demand_from_source = demand_matrix[source, :]
     demand_to_dest = demand_matrix[:, dest]
-    return (demand_from_source + demand_to_dest)/max_demand
+    return demand_from_source + demand_to_dest
 
+
+def node_cost_from_importance(node_importance, weight):
+    return weight / (1.0 + node_importance)
 
 def get_best_route_between(source, dest, graph, demand_matrix, weight):
     node_importance = importance_of_node_in_between(source, dest, demand_matrix)
-    node_cost = 1 / (1.0 + node_importance)
-    w = weight
-    best_route = nx.algorithms.shortest_paths.weighted.dijkstra_path(graph, source, dest, 
-                                                                     weight=lambda u,v,d: 0.5*w*(node_cost[u] + node_cost[v]) + (1 - w)*d['weight']/max_dis)
+    node_cost = node_cost_from_importance(node_importance, weight)
+    best_route = nx.algorithms.shortest_paths.weighted.dijkstra_path(graph, source, dest, weight=lambda u,v,d: node_cost[u] + node_cost[v] + d['weight'])
     return best_route
 
 

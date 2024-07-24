@@ -143,6 +143,84 @@
           37.387219
         ]
       }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "stop_id": 11
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          118.055,
+          37.367
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "stop_id": 12
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          117.991,
+          37.357
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "stop_id": 13
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          117.956,
+          37.363
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "stop_id": 14
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          117.933,
+          37.41
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "stop_id": 15
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          117.992,
+          37.431
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "stop_id": 16
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          117.966,
+          37.405
+        ]
+      }
     }
   ]
 }

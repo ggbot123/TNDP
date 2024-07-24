@@ -23,8 +23,8 @@ start_from_depot = sys.argv[5]
 graph, demand_matrix = genInput.graph.copy(), genInput.demand_matrix.copy() 
 
 if start_from_depot == True:
-    # with open(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\stop_near_depot.txt', 'r') as f:
-    with open(f'{root_dir}\\TNDP-Heuristic\\data\\Mandl\\stop_near_depot.txt', 'r') as f:
+    with open(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\stop_near_depot.txt', 'r') as f:
+    # with open(f'{root_dir}\\TNDP-Heuristic\\data\\Mandl\\stop_near_depot.txt', 'r') as f:
         depot_list = np.array(ast.literal_eval(f.readline().strip()))
 else:
     depot_list = np.arange(graph.number_of_nodes())

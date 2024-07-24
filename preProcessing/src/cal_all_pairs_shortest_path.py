@@ -24,8 +24,8 @@ def save_graph_as_json(distance_matrix, file_path):
     return graph
 
 # dist_file = Path(f'{root_dir}\\preProcessing\\data\\manhattan_distance_matrix_downtown.csv')
-# dist_file = Path(f'{root_dir}\\preProcessing\\data\\regional_dist_matrix.csv')
-dist_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Mandl\\MandlDistances.txt')
+dist_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\revised_regional_dist_matrix.csv')
+# dist_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Mandl\\MandlDistances.txt')
 if dist_file.suffix == '.json':
     with open(dist_file) as f:
         data = json.load(f)
@@ -43,5 +43,5 @@ cost_dict = dict(nx.all_pairs_dijkstra_path_length(graph), weight='weight')
 shortest_path_matrix = np.array([[cost_dict[i][j] for j in range(node_num)] for i in range(node_num)])
 shortest_path = pd.DataFrame(shortest_path_matrix)
 # shortest_path.to_csv(f'{root_dir}\\preProcessing\\data\\Binzhou_downtown_shortest_path_map.csv', index=False)
-# shortest_path.to_csv(f'{root_dir}\\preProcessing\\data\\region_shortest_path_map.csv', index=False)
-shortest_path.to_csv(f'{root_dir}\\TNDP-Heuristic\\data\\Mandl\\shortest_path_map.csv', index=False)
+shortest_path.to_csv(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\revised_region_shortest_path_map.csv', index=False)
+# shortest_path.to_csv(f'{root_dir}\\TNDP-Heuristic\\data\\Mandl\\shortest_path_map.csv', index=False)
