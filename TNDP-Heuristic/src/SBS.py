@@ -1,6 +1,6 @@
 import numpy as np
 import networkx as nx
-from HEU import HEU, get_route, set_demand_satisfied_in_route
+from HEU import HEU, get_route_satisfying_constraint, set_demand_satisfied_in_route
 from operator import attrgetter
 import random
 import logging
@@ -13,16 +13,19 @@ import ast
 from path import root_dir
 
 MAX_ITER = 1
-BEST_WEIGHT = 20
-sp_df = pd.read_csv(f'{root_dir}\\preProcessing\\data\\Binzhou_downtown_shortest_path_map.csv')
+# sp_df = pd.read_csv(f'{root_dir}\\preProcessing\\data\\Binzhou_downtown_shortest_path_map.csv')
+# sp_df = pd.read_csv(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\regional_shortest_path_map.csv')
+sp_df = pd.read_csv(f'{root_dir}\\TNDP-Heuristic\\data\\Mandl\\shortest_path_map.csv')
+
 transfer_time = 15
 wait_time_at_O = 5
 velocity = 4    # min/km
 
 class Individual:
-    def __init__(self, routes, demand_matrix):
+    def __init__(self, routes, demand_matrix, cover_matrix):
         self.routes = routes
         self.demand_matrix = demand_matrix
+        self.cover_matrix = cover_matrix
     def cal_fitness(self, graph, demand_matrix):
         transit_graph = generate_transit_graph(self.routes, graph)
         node_num = graph.number_of_nodes()
@@ -57,12 +60,14 @@ class Individual:
         self.routes.remove(route)
         for i in route:
             for j in route:
-                self.demand_matrix[i][j] = demand_matrix[i][j]
-    def add_route(self, route):
+                self.cover_matrix[i][j] -= 1
+        self.demand_matrix = demand_matrix*np.maximum(1 - self.cover_matrix, 0)
+    def add_route(self, route, demand_matrix):
         self.routes.append(route)
         for i in route:
             for j in route:
-                self.demand_matrix[i][j] = 0
+                self.cover_matrix[i][j] += 1
+        self.demand_matrix = demand_matrix*np.maximum(1 - self.cover_matrix, 0)
     def __str__(self):
         route_str = '\n    '.join(str(route) for route in self.routes)
         return "routes: %s\nfitness: %s\nmean detour coeff: %s\n" % (route_str, str(self.fitness), str(self.detour_coeff.mean()))
@@ -90,18 +95,20 @@ def generate_transit_graph(routes, graph):
     return transit_graph
         
 def generate_weight():
-    return max(np.random.normal(loc=1, scale=0.5) * BEST_WEIGHT, 0)
+    # return max(np.random.normal(loc=1, scale=0.5) * BEST_WEIGHT, 0)
+    return np.random.rand()
 
 def get_initial_solution(pop_size, graph, demand_matrix, min_hop_count, max_hop_count, num_of_routes, depot_list, specified_routes_list):
-    demand_matrix_rest = demand_matrix.copy()
     for routes in specified_routes_list:
+        demand_matrix_rest = demand_matrix.copy()
+        cover_matrix_rest = np.zeros_like(demand_matrix)
         for route in routes:
-            demand_matrix_rest, _ = set_demand_satisfied_in_route(demand_matrix_rest, route)
+            demand_matrix_rest, cover_matrix_rest = set_demand_satisfied_in_route(cover_matrix_rest, demand_matrix_rest, route)
         yield Individual(routes, demand_matrix_rest).cal_fitness(graph, demand_matrix)
     for _ in range(pop_size - len(specified_routes_list)):
         weight = generate_weight()
-        routes, demand_matrix_rest = HEU(graph, demand_matrix, weight, min_hop_count, max_hop_count, num_of_routes, depot_list)
-        yield Individual(routes, demand_matrix_rest).cal_fitness(graph, demand_matrix)
+        routes, demand_matrix_rest, cover_matrix_rest = HEU(graph, demand_matrix, weight, min_hop_count, max_hop_count, num_of_routes, depot_list)
+        yield Individual(routes, demand_matrix_rest, cover_matrix_rest).cal_fitness(graph, demand_matrix)
 
 def add_node(graph, route, side):
     candidate_nodes = [node for node in graph[side] if node not in route]
@@ -143,8 +150,8 @@ def get_heuristic_successor(ind, graph, demand_matrix, min_hop_count, max_hop_co
     source, dest = route[0], route[-1]
     ind.del_route(route, demand_matrix)
     weight = generate_weight()
-    new_route = get_route(source, dest, graph, ind.demand_matrix, weight, min_hop_count, max_hop_count)
-    ind.add_route(new_route)
+    new_route = get_route_satisfying_constraint(graph, ind.cover_matrix, ind.demand_matrix, weight, min_hop_count, max_hop_count, depot_list=None, source=source, dest=dest)
+    ind.add_route(new_route, demand_matrix)
     ind.cal_fitness(graph, demand_matrix)
     return ind
 
@@ -156,13 +163,12 @@ def tournament_select(successors, pop_size, tourn_size):
         selected.append(group_best_ind)
     return selected
 
-def SBS(graph, demand_matrix, min_hop_count, max_hop_count, num_of_routes, best_weight, depot_list, ini_routes_path):
+def SBS(graph, demand_matrix, min_hop_count, max_hop_count, num_of_routes, depot_list, ini_routes_path):
     pop_size = 10
     neib_size = 20
     tourn_size = 180
     p_del = 0.4
     p_heu = 0.9
-    BEST_WEIGHT = best_weight
     best_fitness = []
     
     # start_0 = time.perf_counter()

@@ -1,7 +1,7 @@
 import pandas as pd
 import json
-from cal_adj_matrix import manhattan
-from create_depot_geojson import dict_to_geojson
+from preProcessing.src.cal_adj_matrix import manhattan
+from preProcessing.src.create_depot_geojson import dict_to_geojson
 from path import root_dir
 
 depot_df = pd.read_csv(f'{root_dir}\\preProcessing\\data\\depot.csv')

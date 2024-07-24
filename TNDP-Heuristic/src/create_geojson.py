@@ -3,6 +3,9 @@ import pandas as pd
 import ast
 from path import root_dir
 
+# stop_df = pd.read_csv(f'{root_dir}\\preProcessing\\data\\unique_stop_downtown.csv')
+stop_df = pd.read_csv(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\TAZ_centroids.csv')
+
 def dict_to_geojson(route_dict, location_dict):
     features = []
     for route_name, stops in route_dict.items():
@@ -41,8 +44,6 @@ def dict_to_geojson(route_dict, location_dict):
     return geojson
 
 def create_geojson(routes, filename):
-    # stop_df = pd.read_csv(f'{root_dir}\\preProcessing\\data\\unique_stop_downtown.csv')
-    stop_df = pd.read_csv(f'{root_dir}\\preProcessing\\data\\TAZ_centroids.csv')
     # print(stop_df.index)
     route_dict = {('route %d' % i): routes[i] for i in range(len(routes))}
     # print(route_dict)

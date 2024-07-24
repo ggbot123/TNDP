@@ -2,20 +2,21 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 from geographiclib.geodesic import Geodesic
+import genInput
 from path import root_dir
 
-stop_df = pd.read_csv(f'{root_dir}\\preProcessing\\data\\unique_stop_downtown.csv')
+# stop_df = pd.read_csv(f'{root_dir}\\preProcessing\\data\\unique_stop_downtown.csv')
+stop_df = pd.read_csv(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\TAZ_centroids.csv')
+max_demand = np.max(genInput.demand_matrix)
+max_dis = max(data['weight'] for u,v,data in genInput.graph.edges(data=True))
+
 def get_highest_demand_pair(demand_matrix):
     return np.unravel_index(np.argmax(demand_matrix), demand_matrix.shape)
 
 def get_highest_demand_destination_from(source, demand_matrix, route, taboo_list, graph, weight):
-    O_list, D_list = np.unravel_index(np.argsort(demand_matrix[route], axis=None)[::-1], demand_matrix[route].shape)
-    # ind = np.argsort(demand_matrix[source])[::-1]
-    for i in range(len(O_list)):
-        O, dest = route[O_list[i]], D_list[i]
-        if demand_matrix[O][dest] == 0:
-            return -1, []
-        elif (source, dest) not in taboo_list and not_detour(source, dest, route):
+    ind = np.argsort(demand_matrix[source])[::-1]
+    for dest in ind:
+        if (source, dest) not in taboo_list and not_detour(source, dest, route):
             try:
                 route_chunk = get_best_route_between(source, dest, graph, demand_matrix, weight)
             except nx.NetworkXNoPath as e:
@@ -39,14 +40,14 @@ def get_highest_demand_destination_from_depot(demand_matrix, depot_list):
     ind = np.unravel_index(np.argmax(demand_matrix_from_depot), demand_matrix_from_depot.shape)
     return depot_list[ind[0]], ind[1]
 
-def set_demand_satisfied_in_route(demand_matrix, route):
+def set_demand_satisfied_in_route(cover_matrix, demand_matrix, route):
     demand_matrix = demand_matrix.copy()
-    satisfied_demand = 0.
+    cover_matrix = cover_matrix.copy()
     for i in route:
         for j in route:
-            satisfied_demand += demand_matrix[i][j]
-            demand_matrix[i][j] = 0.
-    return demand_matrix, satisfied_demand
+            cover_matrix[i][j] += 1
+    demand_matrix = demand_matrix*np.maximum((1 - cover_matrix), 0)
+    return demand_matrix, cover_matrix
 
 
 def disconnect_nodes_in_route_from_graph(graph, route):
@@ -58,25 +59,25 @@ def disconnect_nodes_in_route_from_graph(graph, route):
 def importance_of_node_in_between(source, dest, demand_matrix):
     demand_from_source = demand_matrix[source, :]
     demand_to_dest = demand_matrix[:, dest]
-    return demand_from_source + demand_to_dest
+    return (demand_from_source + demand_to_dest)/max_demand
 
-
-def node_cost_from_importance(node_importance, weight):
-    return weight / (1.0 + node_importance)
 
 def get_best_route_between(source, dest, graph, demand_matrix, weight):
     node_importance = importance_of_node_in_between(source, dest, demand_matrix)
-    node_cost = node_cost_from_importance(node_importance, weight)
-    best_route = nx.algorithms.shortest_paths.weighted.dijkstra_path(graph, source, dest, weight=lambda u,v,d: node_cost[u] + node_cost[v] + d['weight'])
+    node_cost = 1 / (1.0 + node_importance)
+    w = weight
+    best_route = nx.algorithms.shortest_paths.weighted.dijkstra_path(graph, source, dest, 
+                                                                     weight=lambda u,v,d: 0.5*w*(node_cost[u] + node_cost[v]) + (1 - w)*d['weight']/max_dis)
     return best_route
 
 
-def get_route_satisfying_constraint(graph, demand_matrix, weight, min_hop_count, max_hop_count, depot_list):
+def get_route_satisfying_constraint(graph, cover_matrix, demand_matrix, weight, min_hop_count, max_hop_count, depot_list, source=None, dest=None):
     graph = graph.copy()
     demand_matrix = demand_matrix.copy()
+    cover_matrix = cover_matrix.copy()
     taboo_list = []
-    # source, dest = get_highest_demand_pair(demand_matrix)
-    source, dest = get_highest_demand_destination_from_depot(demand_matrix, depot_list)
+    if source is None or dest is None:
+        source, dest = get_highest_demand_destination_from_depot(demand_matrix, depot_list)
     route = [source]
     route_chunk = get_best_route_between(source, dest, graph, demand_matrix, weight)
     while True:
@@ -86,33 +87,10 @@ def get_route_satisfying_constraint(graph, demand_matrix, weight, min_hop_count,
         else:
             break
         disconnect_nodes_in_route_from_graph(graph, route[:-1])
-        demand_matrix, _ = set_demand_satisfied_in_route(demand_matrix, route)
+        demand_matrix, cover_matrix = set_demand_satisfied_in_route(cover_matrix, demand_matrix, route)
         source = dest
         dest, route_chunk = get_highest_demand_destination_from(dest, demand_matrix, route, taboo_list, graph, weight)
-        # if demand_matrix[source][dest] == 0 or dest == -1:
-        if dest == -1:
-            break
-    # print(route)
-    return route
-
-def get_route(source, dest, graph, demand_matrix, weight, min_hop_count, max_hop_count):
-    graph = graph.copy()
-    demand_matrix = demand_matrix.copy()
-    taboo_list = []
-    route = [source]
-    route_chunk = get_best_route_between(source, dest, graph, demand_matrix, weight)
-    while True:
-        route_chunk = route_chunk[1:]
-        if len(route) + len(route_chunk) <= max_hop_count:
-            route.extend(route_chunk)
-        else:
-            break
-        disconnect_nodes_in_route_from_graph(graph, route[:-1])
-        demand_matrix, _ = set_demand_satisfied_in_route(demand_matrix, route)
-        source = dest
-        dest, route_chunk = get_highest_demand_destination_from(dest, demand_matrix, route, taboo_list, graph, weight)
-        # if demand_matrix[source][dest] == 0 or dest == -1:
-        if dest == -1:
+        if demand_matrix[source][dest] == 0 or dest == -1:
             break
     # print(route)
     return route
@@ -120,13 +98,16 @@ def get_route(source, dest, graph, demand_matrix, weight, min_hop_count, max_hop
 
 def get_routes(graph, demand_matrix, weight, min_hop_count, max_hop_count, num_of_routes, depot_list):
     demand_matrix = demand_matrix.copy()
+    cover_matrix = np.zeros_like(demand_matrix)
     for _ in range(num_of_routes):
-        route = get_route_satisfying_constraint(graph, demand_matrix, weight, min_hop_count, max_hop_count, depot_list)
-        demand_matrix, satisfied_demand = set_demand_satisfied_in_route(demand_matrix, route)
+        route = get_route_satisfying_constraint(graph, cover_matrix, demand_matrix, weight, min_hop_count, max_hop_count, depot_list)
+        demand_matrix, cover_matrix = set_demand_satisfied_in_route(cover_matrix, demand_matrix, route)
         yield route
     yield demand_matrix
+    yield cover_matrix
+
 
 def HEU(graph, demand_matrix, weight, min_hop_count, max_hop_count, num_of_routes, depot_list):
     solu = list(get_routes(graph, demand_matrix, weight, min_hop_count, max_hop_count, num_of_routes, depot_list))
-    routes, demand_matrix = solu[:-1], solu[-1]
-    return routes, demand_matrix
+    routes, demand_matrix, cover_matrix = solu[:-2], solu[-2], solu[-1]
+    return routes, demand_matrix, cover_matrix

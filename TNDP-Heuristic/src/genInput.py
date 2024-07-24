@@ -6,6 +6,15 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from path import root_dir
 
+dist_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Mandl\\MandlDistances.json')
+demand_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Mandl\\MandlOriginDestination.txt')
+# dist_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Mumford\\M3Distances.json')
+# demand_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Mumford\\M3OriginDestination.txt')
+# dist_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_stops\\manhattan_distance_matrix_downtown.csv')
+# demand_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_stops\\Binzhou_route_OD_downtown.csv')
+# dist_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\regional_dist_matrix.csv')
+# demand_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\regional_OD.csv')
+
 def read_matrix(path):
     text = path.read_text()
     numbers = list(map(int, text.split()))
@@ -25,17 +34,6 @@ def save_graph_as_json(distance_matrix, file_path):
     with open(dest_path, 'w') as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
     return graph
-
-# dist_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Mandl\\MandlDistances.json')
-# demand_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Mandl\\MandlOriginDestination.txt')
-# dist_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Mumford\\M3Distances.json')
-# demand_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Mumford\\M3OriginDestination.txt')
-# dist_file = Path(f'{root_dir}\\preProcessing\\data\\manhattan_distance_matrix.csv')
-# demand_file = Path(f'{root_dir}\\preProcessing\\data\\Binzhou_route_OD.csv')
-# dist_file = Path(f'{root_dir}\\preProcessing\\data\\manhattan_distance_matrix_downtown.csv')
-# demand_file = Path(f'{root_dir}\\preProcessing\\data\\Binzhou_route_OD_downtown.csv')
-dist_file = Path(f'{root_dir}\\preProcessing\\data\\regional_dist_matrix.csv')
-demand_file = Path(f'{root_dir}\\preProcessing\\data\\regional_OD.csv')
 
 if dist_file.suffix == '.json':
     with open(dist_file) as f:
