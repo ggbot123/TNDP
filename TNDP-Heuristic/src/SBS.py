@@ -104,7 +104,7 @@ def get_initial_solution(pop_size, graph, demand_matrix, min_hop_count, max_hop_
         cover_matrix_rest = np.zeros_like(demand_matrix)
         for route in routes:
             demand_matrix_rest, cover_matrix_rest = set_demand_satisfied_in_route(cover_matrix_rest, demand_matrix_rest, route)
-        yield Individual(routes, demand_matrix_rest).cal_fitness(graph, demand_matrix)
+        yield Individual(routes, demand_matrix_rest, cover_matrix_rest).cal_fitness(graph, demand_matrix)
     for _ in range(pop_size - len(specified_routes_list)):
         weight = generate_weight()
         routes, demand_matrix_rest, cover_matrix_rest = HEU(graph, demand_matrix, weight, min_hop_count, max_hop_count, num_of_routes, depot_list)
