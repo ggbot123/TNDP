@@ -128,19 +128,23 @@ def get_trivial_successor(ind, graph, demand_matrix, min_hop_count, max_hop_coun
     route = random.choice(ind.routes)
     count = np.random.randint(0, len(route)/2 + 1) # 目前：包括1/2路线长度的下界
     # side = random.choice([0, -1])
-    side = -1
+    # side = -1
     rand = np.random.rand()
     ind.del_route(route, demand_matrix)
     for _ in range(count):
         if rand < p_del:
             if len(route) <= min_hop_count:
+                side = -1
                 route = add_node(graph, route, route[side])
             else:
+                side = 0
                 route = del_node(route, route[side])
         else:
             if len(route) >= max_hop_count:
+                side = 0
                 route = del_node(route, route[side])
             else:
+                side = -1
                 route = add_node(graph, route, route[side])
     ind.add_route(route, demand_matrix)
     ind.cal_fitness(graph, demand_matrix)
