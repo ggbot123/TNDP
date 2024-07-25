@@ -22,7 +22,7 @@ start_from_depot = sys.argv[5]
 
 graph, demand_matrix = genInput.graph.copy(), genInput.demand_matrix.copy() 
 
-if start_from_depot == True:
+if start_from_depot == 'True':
     with open(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\stop_near_depot.txt', 'r') as f:
     # with open(f'{root_dir}\\TNDP-Heuristic\\data\\Mandl\\stop_near_depot.txt', 'r') as f:
         depot_list = np.array(ast.literal_eval(f.readline().strip()))
@@ -33,4 +33,4 @@ routes = SBS(graph, demand_matrix, min_hop_count, max_hop_count, num_of_routes, 
 eval_routes(routes, graph, demand_matrix)
 
 filename = f'{root_dir}\\TNDP-Heuristic\\result\\routes-SBS-{current_time}.geojson'
-# create_geojson(routes, filename)
+create_geojson(routes, filename)
