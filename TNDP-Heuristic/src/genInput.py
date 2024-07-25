@@ -13,7 +13,7 @@ from path import root_dir
 # dist_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_stops\\manhattan_distance_matrix_downtown.csv')
 # demand_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_stops\\Binzhou_route_OD_downtown.csv')
 dist_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\revised_regional_dist_matrix.csv')
-demand_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\regional_OD.csv')
+demand_file = Path(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\regional_OD_revised.csv')
 
 def read_matrix(path):
     text = path.read_text()

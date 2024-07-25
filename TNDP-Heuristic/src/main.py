@@ -11,8 +11,8 @@ from path import root_dir
 
 current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 logging.basicConfig(filename=f"{root_dir}\\TNDP-Heuristic\\log\\log_{current_time}.log", level=logging.INFO)
-# ini_routes_path = [f'{root_dir}\\TNDP-Heuristic\\result\\routes-Origin.txt']
-ini_routes_path = []
+ini_routes_path = [f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\routes-Origin-region.txt']
+# ini_routes_path = []
 
 max_hop_count = int(sys.argv[2])
 min_hop_count = int(sys.argv[1])

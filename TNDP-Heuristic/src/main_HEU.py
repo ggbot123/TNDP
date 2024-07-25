@@ -34,4 +34,4 @@ for weight in best_weight:
     # filename = f'{root_dir}\\TNDP-Heuristic\\result\\routes-HEU_w={str(weight)}.geojson'
     filename = f'{root_dir}\\TNDP-Heuristic\\result\\routes-from-depots-HEU_w={str(weight)}.geojson'
     # filename = f'{root_dir}\\TNDP-Heuristic\\result\\routes-from-depots-more-detour-HEU_w={str(weight)}.geojson'
-    create_geojson(routes, filename)
+    # create_geojson(routes, filename)

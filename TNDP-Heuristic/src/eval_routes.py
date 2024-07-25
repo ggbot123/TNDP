@@ -79,30 +79,31 @@ def eval_routes(routes, graph, demand_matrix):
         demand_matrix, satisfied_demand = set_demand_satisfied_in_route(route, demand_matrix, transfer_matrix, 1000)
         print(('route %d' % route_id), route, satisfied_demand)
         route_id += 1
-    print('Unfulfilled demand: {}%'.format(demand_matrix.sum()/total_demand))
+    print('Unfulfilled demand: {}%'.format(100*demand_matrix.sum()/total_demand))
 
     demand_matrix = demand_matrix_all.copy()
     for route in routes:
         demand_matrix, _ = set_demand_satisfied_in_route(route, demand_matrix, transfer_matrix, 0)
-    print('Directly unfulfilled demand: {}%'.format(demand_matrix.sum()/total_demand))
+    print('Directly unfulfilled demand: {}%'.format(100*demand_matrix.sum()/total_demand))
 
     demand_matrix = demand_matrix_all.copy()
     for route in routes:
         demand_matrix, _ = set_demand_satisfied_in_route(route, demand_matrix, transfer_matrix, 1)
-    print('One-transfer unfulfilled demand: {}%'.format(demand_matrix.sum()/total_demand))
+    print('One-transfer unfulfilled demand: {}%'.format(100*demand_matrix.sum()/total_demand))
 
     demand_matrix = demand_matrix_all.copy()
     for route in routes:
         demand_matrix, _ = set_demand_satisfied_in_route(route, demand_matrix, transfer_matrix, 2)
-    print('Two-transfer unfulfilled demand: {}%'.format(demand_matrix.sum()/total_demand))
+    print('Two-transfer unfulfilled demand: {}%'.format(100*demand_matrix.sum()/total_demand))
 
 if __name__ == '__main__':
     graph, demand_matrix = genInput.graph.copy(), genInput.demand_matrix.copy()
     routes = []
-    filename = f'{root_dir}\\TNDP-Heuristic\\result\\routes_0722.txt'
-    # filename = f'{root_dir}\\TNDP-Heuristic\\result\\routes-Origin.txt'
+    # filename = f'{root_dir}\\TNDP-Heuristic\\result\\routes_0722.txt'
+    filename = f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\routes-Origin-region.txt'
     with open(filename, 'r') as f:
         for line in f:
             routes.append(ast.literal_eval(line.strip()))
-        print(routes)
+        # print(routes)
+        print(max([len(route) for route in routes]))
     eval_routes(routes, graph, demand_matrix)
