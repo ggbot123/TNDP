@@ -10,12 +10,14 @@ from tqdm import tqdm
 import pandas as pd
 import matplotlib.pyplot as plt
 import ast
+import genInput
 from path import root_dir
 
 MAX_ITER = 200
 # sp_df = pd.read_csv(f'{root_dir}\\preProcessing\\data\\Binzhou_downtown_shortest_path_map.csv')
 sp_df = pd.read_csv(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\revised_region_shortest_path_map.csv')
 # sp_df = pd.read_csv(f'{root_dir}\\TNDP-Heuristic\\data\\Mandl\\shortest_path_map.csv')
+sp_np = sp_df.to_numpy()
 BEST_WEIGHT = 0.5
 transfer_time = 15
 wait_time_at_O = 5
@@ -23,9 +25,9 @@ velocity = 4    # min/km
 
 class Individual:
     def __init__(self, routes, demand_matrix, cover_matrix):
-        self.routes = routes
-        self.demand_matrix = demand_matrix
-        self.cover_matrix = cover_matrix
+        self.routes = routes.copy()
+        self.demand_matrix = demand_matrix.copy()
+        self.cover_matrix = cover_matrix.copy()
     def cal_fitness(self, graph, demand_matrix):
         transit_graph = generate_transit_graph(self.routes, graph)
         node_num = graph.number_of_nodes()
@@ -38,11 +40,12 @@ class Individual:
             # start_1 = time.perf_counter()
             # print('[CAL_TIME] Running time for single-source-dijkstra: %s s\n' %(start_1 - start_0))
             # start_0 = time.perf_counter()
+            opt = optimal_travel_time_between(i, dest=None)
             for j in range(node_num):
-                if j in cost_dict:
-                    cost_matrix[i][j] = cost_dict[j] * demand_matrix[i][j]
+                if j in cost_dict and ((opt[j] > 0 and cost_dict[j]/opt[j] < 1.5) or opt[j] == 0):
+                    cost_matrix[i][j] = (cost_dict[j] - opt[j]) * demand_matrix[i][j]
                 else:
-                    cost_matrix[i][j] = demand_matrix[i][j] * (50 + optimal_travel_time_between(graph, i, j))
+                    cost_matrix[i][j] = demand_matrix[i][j] * (50/velocity + opt[j])
             # start_1 = time.perf_counter()
             # print('[CAL_TIME] Running time for calculate optimal travel time: %s s\n' %(start_1 - start_0))
         # start_1 = time.perf_counter()
@@ -72,8 +75,11 @@ class Individual:
         route_str = '\n    '.join(str(route) for route in self.routes)
         return "routes: %s\nfitness: %s\nmean detour coeff: %s\n" % (route_str, str(self.fitness), str(self.detour_coeff.mean()))
 
-def optimal_travel_time_between(graph, source, dest):
+def optimal_travel_time_between(source, dest):
     # return nx.dijkstra_path_length(graph, source, dest, weight='weight')
+    if dest is None:
+        # return sp_df.loc[source]
+        return sp_np[source, :]
     return sp_df.loc[source, str(dest)]
 
 def generate_transit_graph(routes, graph):
@@ -230,3 +236,14 @@ def SBS(graph, demand_matrix, min_hop_count, max_hop_count, num_of_routes, depot
     plt.grid(True)
     plt.savefig(f'{root_dir}\\TNDP-Heuristic\\result\\fitness_variation.png')
     return best_ind
+
+if __name__ == '__main__':
+    graph, demand_matrix = genInput.graph.copy(), genInput.demand_matrix.copy()
+    routes = []
+    filename = f'{root_dir}\\TNDP-Heuristic\\result\\txt\\routes_0727.txt'
+    with open(filename, 'r') as f:
+        for line in f:
+            routes.append(ast.literal_eval(line.strip()))
+    cover_matrix = np.zeros_like(demand_matrix)
+    ind = Individual(routes, demand_matrix, cover_matrix)
+    ind.cal_fitness(graph, demand_matrix)

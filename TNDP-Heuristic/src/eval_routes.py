@@ -1,12 +1,15 @@
 import numpy as np
 import networkx as nx
 import ast
-from path import root_dir
+import pandas as pd
 import genInput
+import sys
+from path import root_dir
 
 transfer_time = 5
 wait_time_at_O = 5
 velocity = 4    # min/km
+sp_np = pd.read_csv(f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\revised_region_shortest_path_map.csv').to_numpy()
 
 def generate_transit_graph(routes, graph):
     transit_graph = nx.Graph()
@@ -58,16 +61,21 @@ def eval_routes(routes, graph, demand_matrix):
     demand_matrix = demand_matrix.copy()
     total_demand = demand_matrix.sum()
     travel_time_matrix, transfer_matrix = evaluate(routes, graph, demand_matrix)
+    travel_time_ratio = travel_time_matrix/(sp_np*velocity)
     np.savetxt(f'{root_dir}\\TNDP-Heuristic\\result\\travel_time.csv', travel_time_matrix, delimiter=',', fmt="%.2f")
     np.savetxt(f'{root_dir}\\TNDP-Heuristic\\result\\transfer.csv', transfer_matrix, delimiter=',', fmt="%d")
+    np.savetxt(f'{root_dir}\\TNDP-Heuristic\\result\\travel_time_ratio.csv', travel_time_ratio, delimiter=',', fmt="%.2f")
     travel_time_matrix_weighted = travel_time_matrix * demand_matrix
     transfer_matrix_weighted = transfer_matrix * demand_matrix
+    travel_time_ratio_weighted = travel_time_ratio * demand_matrix
     # ATT = travel_time_matrix[np.where(travel_time_matrix != -1)].mean()
     # ATrans = transfer_matrix[np.where(transfer_matrix != -1)].mean()
     ATT = travel_time_matrix_weighted[np.where(travel_time_matrix_weighted >= 0)].sum()/total_demand
     ATrans = transfer_matrix_weighted[np.where(transfer_matrix_weighted >= 0)].sum()/total_demand
+    ATTR = travel_time_ratio_weighted[np.where(travel_time_ratio_weighted >= 0)].sum()/total_demand
     print('\nAverage Travel Time: %f min' % ATT)
     print('Average Transfer: %f' % ATrans)
+    print('Average Travel Time Ratio: %f' % ATTR)
 
     demand_matrix_all = demand_matrix
     total_demand = demand_matrix_all.sum()
@@ -77,7 +85,7 @@ def eval_routes(routes, graph, demand_matrix):
     for route in routes:
         assert(len(route) == len(set(route)))
         demand_matrix, satisfied_demand = set_demand_satisfied_in_route(route, demand_matrix, transfer_matrix, 1000)
-        print(('route %d' % route_id), route, satisfied_demand)
+        # print(('route %d' % route_id), route, satisfied_demand)
         route_id += 1
     print('Unfulfilled demand: {}%'.format(100*demand_matrix.sum()/total_demand))
 
@@ -99,11 +107,16 @@ def eval_routes(routes, graph, demand_matrix):
 if __name__ == '__main__':
     graph, demand_matrix = genInput.graph.copy(), genInput.demand_matrix.copy()
     routes = []
-    # filename = f'{root_dir}\\TNDP-Heuristic\\result\\routes_0722.txt'
-    filename = f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\routes-Origin-region.txt'
+    filename = f'{root_dir}\\TNDP-Heuristic\\result\\txt\\routes_0730.txt'
+    # filename = f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\routes-Origin-region.txt'
+    exclude = ast.literal_eval(str(sys.argv[1]))
     with open(filename, 'r') as f:
         for line in f:
             routes.append(ast.literal_eval(line.strip()))
         # print(routes)
         print(max([len(route) for route in routes]))
+    
+    for i in exclude:
+        del routes[i]
     eval_routes(routes, graph, demand_matrix)
+    
