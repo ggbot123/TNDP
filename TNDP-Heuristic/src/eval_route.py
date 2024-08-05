@@ -1,27 +1,29 @@
 import numpy as np
 import genInput
 import ast
-import sys
 import matplotlib.pyplot as plt
 import seaborn as sns
-from IPython.display import clear_output
+import copy
+import csv
 from path import root_dir
 
-def set_demand_satisfied_in_route(cover_matrix, demand_matrix, route):
+def set_demand_satisfied_in_route(cover_matrix, demand_matrix, cover_rid_matrix, route, rid):
     demand_matrix = demand_matrix.copy()
     cover_matrix = cover_matrix.copy()
+    cover_rid_matrix = copy.deepcopy(cover_rid_matrix)
     for i in route:
         for j in route:
             cover_matrix[i][j] += 1
+            cover_rid_matrix[i, j].append(rid)
     demand_matrix = demand_matrix*np.maximum((1 - cover_matrix), 0)
-    return demand_matrix, cover_matrix
+    return demand_matrix, cover_matrix, cover_rid_matrix
 
 class Individual:
     def __init__(self, routes, demand_matrix, cover_matrix):
         self.routes = routes.copy()
         self.demand_matrix = demand_matrix.copy()
         self.cover_matrix = cover_matrix
-    def del_route(self, route, demand_matrix):
+    def del_route(self, rid, route, demand_matrix):
         self.routes.remove(route)
         for i in route:
             for j in route:
@@ -30,7 +32,7 @@ class Individual:
         self.demand_matrix = demand_matrix*np.maximum(1 - self.cover_matrix, 0)
         demand_change = self.demand_matrix - tmp
         return np.array(np.where(demand_change != 0)).T, demand_change
-    def add_route(self, route, demand_matrix):
+    def add_route(self, rid, route, demand_matrix):
         self.routes.append(route)
         for i in route:
             for j in route:
@@ -54,9 +56,14 @@ if __name__ == '__main__':
         for line in f:
             routes.append(ast.literal_eval(line.strip()))
     cover_matrix = np.zeros_like(demand_matrix)
+    cover_rid_matrix = np.empty(demand_matrix.shape, dtype=object)
+    for i in range(cover_rid_matrix.shape[0]):
+        for j in range(cover_rid_matrix.shape[1]):
+            cover_rid_matrix[i, j] = []
     ind = Individual(routes, demand_matrix, cover_matrix)
-    for route in routes:
-        ind.demand_matrix, ind.cover_matrix = set_demand_satisfied_in_route(ind.cover_matrix, ind.demand_matrix, route)
+    for i in range(len(routes)):
+        route = routes[i]
+        ind.demand_matrix, ind.cover_matrix, cover_rid_matrix = set_demand_satisfied_in_route(ind.cover_matrix, ind.demand_matrix, cover_rid_matrix, route, i)
     flatten_indices = indices = np.argsort(ind.demand_matrix, axis=None)[::-1]
     flatten_values = ind.demand_matrix.flatten()[flatten_indices]
     indices = np.unravel_index(flatten_indices, ind.demand_matrix.shape)
@@ -67,13 +74,23 @@ if __name__ == '__main__':
     unfulfilled_demand = ind.demand_matrix.copy()
     for i in range(len(routes)):
         route = routes[i]
-        changes, demand_change = ind.del_route(route, demand_matrix)
+        changes, demand_change = ind.del_route(i, route, demand_matrix)
         flatten_indices = indices = np.argsort(demand_change, axis=None)[::-1]
         flatten_values = demand_change.flatten()[flatten_indices]
         indices = np.unravel_index(flatten_indices, demand_change.shape)
         leaked_OD.append([(indices[0][j], indices[1][j], flatten_values[j]) for j in range(len(flatten_values))])
         demand_without[i] = ind.demand_matrix.sum() - unfulfilled_demand.sum()
-        ind.add_route(route, demand_matrix)
+        ind.add_route(i, route, demand_matrix)
+
+    # 保存cover_rid_matrix到 CSV 文件
+    # filename = f"{root_dir}\\postProcessing\\result\\cover_rid_matrix.csv"
+    # with open(filename, mode='w', newline='') as file:
+    #     writer = csv.writer(file)
+    #     for row in cover_rid_matrix:
+    #         # 将每一行转换为字符串形式，并将数组转换为逗号分隔的字符串
+    #         str_row = [",".join(map(str, elem)) for elem in row]
+    #         writer.writerow(str_row)
+    # print(f"矩阵已保存到 {filename}")
     
 
     plt.ion()
@@ -103,11 +120,11 @@ if __name__ == '__main__':
             command, *args = user_input.split()
             if command == "add":
                 index = int(args[0])
-                changes, _ = ind.add_route(routes[index], demand_matrix)
+                changes, _ = ind.add_route(index, routes[index], demand_matrix)
                 print(ind.demand_matrix.sum())
             elif command == "del":
                 index = int(args[0])
-                changes, _ = ind.del_route(routes[index], demand_matrix)
+                changes, _ = ind.del_route(index, routes[index], demand_matrix)
                 print(ind.demand_matrix.sum())
             elif command == "check":
                 if args[0] == 'all':
@@ -132,6 +149,9 @@ if __name__ == '__main__':
                     for O, D, demand in unfulfilled_OD[0:20:2]:
                         f.write(f'{O+1} {D+1}\n')
                         print(f'O: {O+1}, D: {D+1}, unfulfilled demand: {demand}')
+            elif command == 'cover':
+                O, D = int(args[0]), int(args[1])
+                print(f'OD is covered by route {cover_rid_matrix[O-1, D-1]}')
             else:
                 print("invalid input")
     plt.ioff()
