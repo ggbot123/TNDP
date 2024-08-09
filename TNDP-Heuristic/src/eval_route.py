@@ -47,11 +47,20 @@ def get_leaked_OD(i, demand_without, leaked_OD, num_of_return):
     print(f'route {i}: {demand_without[i]} OD amount unfulfilled if deleted, importance rank {np.where(route_imp_rank == i)[0][0] + 1}')
     return leaked_OD[i][0:num_of_return:2]
 
+def get_satisfied_demand(route, demand_matrix):
+    demand_matrix = demand_matrix.copy()
+    satisfied_demand = 0
+    for i in route:
+        for j in route:
+            satisfied_demand += demand_matrix[i, j]
+    print(f'Satisfied demand: {satisfied_demand}')
+    return satisfied_demand
+
 if __name__ == '__main__':
     graph, demand_matrix = genInput.graph.copy(), genInput.demand_matrix.copy()
     total_demand = demand_matrix.sum()
     routes = []
-    filename = f'{root_dir}\\TNDP-Heuristic\\result\\txt\\routes_0727.txt'
+    filename = f'{root_dir}\\TNDP-Heuristic\\result\\txt\\routes-Final-revised.txt'
     with open(filename, 'r') as f:
         for line in f:
             routes.append(ast.literal_eval(line.strip()))
@@ -60,10 +69,12 @@ if __name__ == '__main__':
     for i in range(cover_rid_matrix.shape[0]):
         for j in range(cover_rid_matrix.shape[1]):
             cover_rid_matrix[i, j] = []
+
     ind = Individual(routes, demand_matrix, cover_matrix)
     for i in range(len(routes)):
         route = routes[i]
         ind.demand_matrix, ind.cover_matrix, cover_rid_matrix = set_demand_satisfied_in_route(ind.cover_matrix, ind.demand_matrix, cover_rid_matrix, route, i)
+
     flatten_indices = indices = np.argsort(ind.demand_matrix, axis=None)[::-1]
     flatten_values = ind.demand_matrix.flatten()[flatten_indices]
     indices = np.unravel_index(flatten_indices, ind.demand_matrix.shape)
@@ -133,12 +144,14 @@ if __name__ == '__main__':
                     args[0] = [int(args[0])]
                 for rid in args[0]:
                     OD_pairs = get_leaked_OD(rid, demand_without, leaked_OD, 2*5)
+                    satisfied_demand = get_satisfied_demand(routes[rid], demand_matrix)
                     with open(f'{root_dir}\\TNDP-Heuristic\\result\\txt\\OD_pairs\\{rid}.txt', 'w') as f:
-                        for O, D, demand in OD_pairs[::-1]:
-                            # f.write(f'{O+1} {D+1} {demand}\n')
-                            f.write(f'{O+1} {D+1}\n')
+                        for O, D, demand in OD_pairs:
+                            f.write(f'{O+1} {D+1} {demand}\n')
+                            # f.write(f'{O+1} {D+1}\n')
                             print(f'O: {O+1}, D: {D+1}, leaked demand: {demand}')
-                        # f.write(f'{demand_without[rid]}')
+                        f.write(f'{demand_without[rid]}\n')
+                        f.write(f'{satisfied_demand}')
                 # get_ATT_increase(int(args[1]), graph, demand_matrix)
             elif command == "demand-at":
                 O, D = int(args[0]), int(args[1])

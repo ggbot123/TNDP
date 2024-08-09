@@ -86,6 +86,7 @@ def eval_routes(routes, graph, demand_matrix):
         assert(len(route) == len(set(route)))
         demand_matrix, satisfied_demand = set_demand_satisfied_in_route(route, demand_matrix, transfer_matrix, 1000)
         # print(('route %d' % route_id), route, satisfied_demand)
+        print([i+1 for i in route])
         route_id += 1
     print('Unfulfilled demand: {}%'.format(100*demand_matrix.sum()/total_demand))
 
@@ -107,7 +108,7 @@ def eval_routes(routes, graph, demand_matrix):
 if __name__ == '__main__':
     graph, demand_matrix = genInput.graph.copy(), genInput.demand_matrix.copy()
     routes = []
-    filename = f'{root_dir}\\TNDP-Heuristic\\result\\txt\\routes_0730.txt'
+    filename = f'{root_dir}\\TNDP-Heuristic\\result\\txt\\routes_0727.txt'
     # filename = f'{root_dir}\\TNDP-Heuristic\\data\\Binzhou_TAZs\\routes-Origin-region.txt'
     exclude = ast.literal_eval(str(sys.argv[1]))
     with open(filename, 'r') as f:
