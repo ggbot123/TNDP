@@ -12,12 +12,14 @@ from PyQt5.QtGui import QColor
 # 读取文件中的编号对
 def read_id_pairs_from_file(file_path):
     id_pairs = []
+    OD = []
     with open(file_path, 'r') as file:
         for line in file:
             parts = line.strip().split()
             if len(parts) >= 2:
                 id_pairs.append((int(parts[0]), int(parts[1])))
-    return id_pairs
+                OD.append(float(parts[2]))
+    return id_pairs, OD
 
 # 高亮显示指定编号对的多边形
 def highlight_polygon_pairs(layer_name, id_pairs):
@@ -54,12 +56,13 @@ def highlight_polygon_pairs(layer_name, id_pairs):
     layer.triggerRepaint()
 
 # 文件路径和图层名称
-file_path = 'D:\\learning\\workspace\\python\\TNDP\\TNDP-Heuristic\\result\\txt\\OD_pairs\\25.txt'  # 替换为实际文件路径
+file_path = 'D:\\learning\\workspace\\python\\TNDP\\TNDP-Heuristic\\result\\txt\\OD_pairs\\4.txt'  # 替换为实际文件路径
 layer_name = 'TAZ_revised'  # 替换为你的图层名称
 
 # 读取文件中的编号对
-polygon_id_pairs_to_highlight = read_id_pairs_from_file(file_path)
+polygon_id_pairs_to_highlight, OD = read_id_pairs_from_file(file_path)
 print(polygon_id_pairs_to_highlight)
+print(OD)
 
 # 高亮显示这些编号对对应的多边形
 highlight_polygon_pairs(layer_name, polygon_id_pairs_to_highlight)

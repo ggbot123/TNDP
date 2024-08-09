@@ -7,8 +7,8 @@ import processing
 from qgis.core import QgsPointXY, QgsProject, QgsVectorLayer, QgsGeometry
 
 # 定义输入图层
-road_network_layer = QgsProject.instance().mapLayersByName("Output layer")[0]
-points_layer = QgsProject.instance().mapLayersByName("line_26")[0]
+road_network_layer = QgsProject.instance().mapLayersByName("道路网络")[0]
+points_layer = QgsProject.instance().mapLayersByName("line_5")[0]
 
 points = [feat.geometry().asPoint() for feat in points_layer.getFeatures()]
 
